@@ -1,24 +1,56 @@
 using UnityEngine;
 
-// SAHİBİ: Ali. Bu dosyanın içini sadece Ali doldurur.
-// İSKELET: Fonksiyon adlarını DEĞİŞTİRMEYİN, başkaları bunları kullanıyor.
+// SAHİBİ: Ali
 public class RobotBattery : MonoBehaviour
 {
-    // Bataryayı belli bir miktar azalt (ileride hareket kodu çağıracak)
-    public void Drain(float amount)
+    [SerializeField] private float maxBattery = 100f;   // tam dolu batarya (market ile artacak)
+
+    private float currentBattery;      // şu anki batarya
+    private bool emptyMessageShown;    // "bitti" mesajı yazıldı mı?
+
+    void Awake()
     {
-        // Ali dolduracak
+        // Oyun başlarken batarya tam dolu
+        currentBattery = maxBattery;
     }
 
-    // Bataryayı tamamen doldur (şarj istasyonu çağırır)
+    // Bataryayı belli bir miktar azalt
+    public void Drain(float amount)
+    {
+        if (amount <= 0f) return;           // kontrol: eksi ya da sıfır miktar anlamsız
+        if (IsEmpty()) return;              // kontrol: zaten bittiyse bir şey yapma
+
+        currentBattery -= amount;
+
+        if (currentBattery < 0f)            // sıfırın altına inmesin
+        {
+            currentBattery = 0f;
+        }
+
+        if (IsEmpty() && !emptyMessageShown) // bittiyse mesajı BİR KERE yaz
+        {
+            Debug.Log("Battery empty!");
+            emptyMessageShown = true;
+        }
+    }
+
+    // Bataryayı tamamen doldur
     public void RechargeFull()
     {
-        // Ali dolduracak
+        currentBattery = maxBattery;
+        emptyMessageShown = false;          // bir dahaki bitişte mesaj tekrar yazılabilsin
+        Debug.Log("Battery full: " + currentBattery);
     }
 
     // Batarya bitti mi?
     public bool IsEmpty()
     {
-        return false; // geçici: Ali dolduracak
+        return currentBattery <= 0f;
+    }
+
+    // Bataryanın doluluk oranı, 0 ile 1 arası (ileride ekrandaki batarya çubuğu kullanacak)
+    public float GetPercent()
+    {
+        return currentBattery / maxBattery;
     }
 }
