@@ -1,30 +1,59 @@
 using UnityEngine;
 
-// SAHİBİ: Furkan. Bu dosyanın içini sadece Furkan doldurur.
-// İSKELET: Fonksiyon adlarını DEĞİŞTİRMEYİN, başkaları bunları kullanıyor.
+// SAHİBİ: Furkan
 public class RobotStorage : MonoBehaviour
 {
-    // Depoda yer var mı? (Çöp bunu sorup ona göre toplanır)
+    [SerializeField] private int capacity = 1;   // aynı anda kaç çöp taşıyabilir (market ile artacak)
+
+    private int itemCount;        // şu an depoda kaç çöp var
+    private int carriedValue;     // depodaki çöplerin toplam değeri
+    private float carriedWeight;  // depodaki çöplerin toplam ağırlığı
+    private int scrap;            // teslim edilip kazanılan toplam Scrap
+
+    // Depoda yer var mı?
     public bool CanCollect()
     {
-        return true; // geçici: Furkan dolduracak
+        return itemCount < capacity;
     }
 
-    // Depoya bir çöp ekle (değeri ve ağırlığı ile)
+    // Depoya bir çöp ekle
     public void AddTrash(int value, float weight)
     {
-        // Furkan dolduracak
+        if (!CanCollect()) return;   // kontrol: yer yoksa hiçbir şey yapma
+
+        itemCount++;
+        carriedValue += value;
+        carriedWeight += weight;
+
+        Debug.Log("Storage " + itemCount + "/" + capacity
+                  + " · value " + carriedValue
+                  + " · weight " + carriedWeight);
     }
 
-    // Depoyu boşalt, değeri Scrap'e çevir (teslim noktası çağırır)
+    // Depoyu boşalt, taşınan değeri Scrap'e çevir
     public void Unload()
     {
-        // Furkan dolduracak
+        if (itemCount == 0) return;  // kontrol: depo boşsa hiçbir şey yapma
+
+        scrap += carriedValue;
+        Debug.Log("Delivered " + carriedValue + " · Scrap: " + scrap);
+
+        itemCount = 0;
+        carriedValue = 0;
+        carriedWeight = 0f;
     }
 
-    // Toplam Scrap (ileride market kullanacak)
+    // Toplam Scrap
     public int GetScrap()
     {
-        return 0; // geçici: Furkan dolduracak
+        return scrap;
     }
+
+    // Taşınan toplam ağırlık (4. haftada robot ağırken yavaşlayacak)
+    public float GetCarriedWeight()
+    {
+        return carriedWeight;
+    }
+
+   
 }
