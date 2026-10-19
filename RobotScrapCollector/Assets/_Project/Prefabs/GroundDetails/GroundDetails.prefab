@@ -51,7 +51,6 @@ GameObject:
   - component: {fileID: 2777451581471836960}
   - component: {fileID: 5439869749354613300}
   - component: {fileID: 6859311654324263830}
-  - component: {fileID: 5085473425777665199}
   m_Layer: 0
   m_Name: Road
   m_TagString: Untagged
@@ -131,27 +130,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5085473425777665199
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2945820830906049608}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2962176984889447673
 GameObject:
   m_ObjectHideFlags: 0
@@ -163,7 +141,6 @@ GameObject:
   - component: {fileID: 1050754472563844097}
   - component: {fileID: 6637440368612208703}
   - component: {fileID: 1907652702657119588}
-  - component: {fileID: 1977167714573431510}
   m_Layer: 0
   m_Name: OilPatch_2
   m_TagString: Untagged
@@ -243,27 +220,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &1977167714573431510
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2962176984889447673}
-  m_Material: {fileID: 13400000, guid: 0ed992ee00ef9fc45a170b8922b1164c, type: 2}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6057687306587682557
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,7 +231,6 @@ GameObject:
   - component: {fileID: 8797864662617069436}
   - component: {fileID: 8095358302745954132}
   - component: {fileID: 312131176280519975}
-  - component: {fileID: 2163502943315881669}
   m_Layer: 0
   m_Name: Dirt1
   m_TagString: Untagged
@@ -355,27 +310,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2163502943315881669
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6057687306587682557}
-  m_Material: {fileID: 13400000, guid: c74a679bfe35e144294a6d6683ec86da, type: 2}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6703700014841036519
 GameObject:
   m_ObjectHideFlags: 0
@@ -521,7 +455,6 @@ GameObject:
   - component: {fileID: 7085632695448768073}
   - component: {fileID: 7997921034024896532}
   - component: {fileID: 8500615443470971909}
-  - component: {fileID: 3800259497654528011}
   m_Layer: 0
   m_Name: OilPatch_1
   m_TagString: Untagged
@@ -601,27 +534,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3800259497654528011
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7779135881711393937}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7815166843922487506
 GameObject:
   m_ObjectHideFlags: 0
@@ -700,7 +612,6 @@ GameObject:
   - component: {fileID: 5154596641317436583}
   - component: {fileID: 3644216111377365291}
   - component: {fileID: 5916814518502551828}
-  - component: {fileID: 2150616328285473494}
   m_Layer: 0
   m_Name: Dirt2
   m_TagString: Untagged
@@ -780,27 +691,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2150616328285473494
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8493846490237716663}
-  m_Material: {fileID: 13400000, guid: c74a679bfe35e144294a6d6683ec86da, type: 2}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &9201071283365150925
 GameObject:
   m_ObjectHideFlags: 0
