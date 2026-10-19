@@ -229,6 +229,8 @@ GameObject:
   - component: {fileID: 967769243441325368}
   - component: {fileID: 1081292056096895530}
   - component: {fileID: 8882064071231767523}
+  - component: {fileID: 6623973262272213863}
+  - component: {fileID: 6817149659092373669}
   m_Layer: 0
   m_Name: Robot
   m_TagString: Player
@@ -259,7 +261,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4802413251881706713}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 1c77656f33f31b946a00c749e20e8e98, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -297,7 +299,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!114 &967769243441325368
@@ -312,6 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd8f97417eadca54d974fbd091f50cf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotBattery
+  maxBattery: 100
 --- !u!114 &1081292056096895530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -324,6 +327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3c107b4a5bef274d9f1a704deaac4cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotSpeed
+  baseSpeed: 3
 --- !u!114 &8882064071231767523
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,6 +340,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 219355c21ac621e40b6d63ff3d18a68e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotStorage
+  capacity: 1
+--- !u!114 &6623973262272213863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4802413251881706713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24fef89a156e32247b373a1da5abc910, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GroundCheck
+--- !u!114 &6817149659092373669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4802413251881706713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0bad831c7c97c544b98826e27e8a844, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RobotMove
+  acceleration: 20
+  turnSpeed: 360
 --- !u!1 &5302801452387568252
 GameObject:
   m_ObjectHideFlags: 0
