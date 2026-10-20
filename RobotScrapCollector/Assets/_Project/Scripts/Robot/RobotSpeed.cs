@@ -1,35 +1,58 @@
 using UnityEngine;
 
-// SAHİBİ: Nazife. Bu dosyanın içini sadece Nazife doldurur.
-// İSKELET: Fonksiyon adlarını DEĞİŞTİRMEYİN, başkaları bunları kullanıyor.
+// SAHİBİ: Nazife
 public class RobotSpeed : MonoBehaviour
 {
-    [SerializeField] private float baseSpeed = 3f;   // normal hız (tasarım: 3, market ile artacak)
+    [SerializeField] private float baseSpeed = 3f;          // normal hız (market ile artacak)
+    [SerializeField] private float slowPerWeight = 0.1f;    // her 1 ağırlık hızı ne kadar düşürür (0.1 = %10)
+    [SerializeField] private float minWeightFactor = 0.4f;  // ağırlık hızı en fazla bu orana kadar düşürebilir
 
-    private float surfaceMultiplier = 1f;            // zemin çarpanı: normal 1, çamur 0.5, yağ 1.5
+    private float surfaceMultiplier = 1f;   // zemin çarpanı: normal 1, çamur 0.5, yağ 1.5
+    private RobotStorage storage;           // ağırlığı buradan soracağız (Furkan'ın script'i)
 
-    // Zemin hız çarpanını ayarla (çamur 0.5, yağ 1.5)
+    void Awake()
+    {
+        // Aynı robottaki depoyu bir kere bul ve sakla
+        storage = GetComponent<RobotStorage>();
+    }
+
+    // ----- ZEMİN (geçen haftadan, değişmedi) -----
+
     public void SetSurface(float multiplier)
     {
-        if (multiplier <= 0f) return;   // 0 ya da eksi çarpan robotu durdurur, kabul etme
+        if (multiplier <= 0f) return;
         surfaceMultiplier = multiplier;
     }
 
-    // Normal zemine dön (çarpan 1)
     public void ResetSurface()
     {
         surfaceMultiplier = 1f;
     }
 
-    // Şu anki hız çarpanı (ileride hareket kodu kullanacak)
     public float GetMultiplier()
     {
         return surfaceMultiplier;
     }
 
-    // Robotun şu anki gerçek hızı (4. haftada hareket kodu kullanacak)
+    // ----- AĞIRLIK (yeni) -----
+
+    // Taşınan ağırlığa göre hız çarpanı: boşken 1, ağırlaştıkça azalır
+    public float GetWeightFactor()
+    {
+        if (storage == null) return 1f;   // depo yoksa ağırlık da yok
+
+        float weight = storage.GetCarriedWeight();
+        float factor = 1f - weight * slowPerWeight;
+
+        // Alt sınır: hız hiçbir zaman minWeightFactor'ın altına inmesin
+        return Mathf.Max(factor, minWeightFactor);
+    }
+
+    // ----- SONUÇ -----
+
+    // Robotun şu anki gerçek hızı (RobotMove her fizik adımında bunu sorar)
     public float GetSpeed()
     {
-        return baseSpeed * surfaceMultiplier;
+        return baseSpeed * surfaceMultiplier * GetWeightFactor();
     }
 }
