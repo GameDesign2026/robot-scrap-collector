@@ -53,7 +53,18 @@ public class RobotStorage : MonoBehaviour
     public float GetCarriedWeight()
     {
         return carriedWeight;
+
+    }
+    public int GetItemCount()
+    {
+        return itemCount;
     }
 
-   
+    // Kapasite kaç (ileride ekrandaki "Storage 1/1" yazısı kullanacak)
+    public int GetCapacity()
+    {
+        return capacity;
+    }
+
+
 }
