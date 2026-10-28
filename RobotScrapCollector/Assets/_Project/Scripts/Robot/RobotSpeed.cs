@@ -55,4 +55,12 @@ public class RobotSpeed : MonoBehaviour
     {
         return baseSpeed * surfaceMultiplier * GetWeightFactor();
     }
+        // ===== 5. HAFTA SÖZLEŞMESİ (Nazife dolduracak) =====
+
+    // Temel hızı artır (market)
+    public void IncreaseBaseSpeed(float amount) { }
+
+    // Zemin tutuşu: 1 = normal, küçük = kaygan (yağ)
+    public float GetGrip() { return 1f; }
+    public void SetGrip(float grip) { }
 }

@@ -65,6 +65,31 @@ public class RobotStorage : MonoBehaviour
     {
         return capacity;
     }
+        // ===== 5. HAFTA SÖZLEŞMESİ (Furkan dolduracak) =====
+
+    // Çöpü boş bir slota koymaya çalış. Koyabildiyse true.
+    public bool TryAddItem(TrashItem item) { return false; }
+
+    // Seçili slottaki çöpü yere bırak (Q)
+    public void DropSelected() { }
+
+    // Seçili slotun numarası (0'dan başlar)
+    public int GetSelectedIndex() { return 0; }
+
+    // Kaç slot açık (başta 1)
+    public int GetUnlockedSlots() { return 1; }
+
+    // Toplam slot sayısı (kilitliler dahil)
+    public int GetMaxSlots() { return 5; }
+
+    // Bu slotta hangi çöp var? (boşsa null)
+    public TrashItem GetItemInSlot(int index) { return null; }
+
+    // Bir slot daha aç (market)
+    public void UnlockSlot() { }
+
+    // Scrap harca. Yeterliyse düşer ve true döner.
+    public bool SpendScrap(int amount) { return false; }
 
 
 }

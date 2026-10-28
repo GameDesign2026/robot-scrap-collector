@@ -53,4 +53,8 @@ public class RobotBattery : MonoBehaviour
     {
         return currentBattery / maxBattery;
     }
+        // ===== 5. HAFTA SÖZLEŞMESİ (Ali dolduracak) =====
+
+    // Maksimum bataryayı artır (market)
+    public void IncreaseMax(float amount) { }
 }

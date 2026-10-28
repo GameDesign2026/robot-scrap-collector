@@ -1,5 +1,8 @@
 using UnityEngine;
 
+// Çöp türleri (hotbar renkleri ve üretici kullanıyor)
+public enum TrashType { Normal, Metal, Electronic }
+
 // SAHİBİ: Sümeyra
 public class TrashItem : MonoBehaviour
 {
@@ -81,4 +84,15 @@ public class TrashItem : MonoBehaviour
         pickupTrigger.enabled = true;         // tekrar toplanabilsin
         Debug.Log(name + " respawned");
     }
+        // ===== 5. HAFTA SÖZLEŞMESİ (Sümeyra dolduracak) =====
+
+    public bool CanBePickedUp() { return true; }
+    public void OnPickedUp() { }
+    public void OnDropped(Vector3 position, Vector3 throwDirection) { }
+    public void OnDelivered() { }
+    public int GetValue() { return value; }
+    public float GetWeight() { return weight; }
+    public TrashType GetTrashType() { return TrashType.Normal; }
+    public void SetHighlight(bool on) { }
+    public void SetSpawner(TrashSpawner spawner) { }
 }

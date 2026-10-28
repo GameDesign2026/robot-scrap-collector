@@ -4,61 +4,121 @@ using UnityEngine.InputSystem;
 // SAHİBİ: Hamza
 public class RobotMove : MonoBehaviour
 {
-    // Oyun hissinin iki ayar düğmesi (üçüncüsü olan hız, RobotSpeed'de)
-    [SerializeField] private float acceleration = 20f;   // hız saniyede en fazla ne kadar değişebilir
-    [SerializeField] private float turnSpeed = 360f;     // saniyede en fazla kaç derece dönebilir
+    [SerializeField] private float acceleration = 20f;      // hız ne kadar çabuk değişir
+    [SerializeField] private float mouseSensitivity = 0.1f; // fare 1 piksel = kaç derece
+    [SerializeField] private float minPitch = -60f;         // en fazla ne kadar yukarı bakılır
+    [SerializeField] private float maxPitch = 60f;          // en fazla ne kadar aşağı bakılır
+    [SerializeField] private Transform cameraPivot;         // kameranın tutulduğu nokta (yukarı/aşağı bakış)
 
     private Rigidbody rb;
-    private RobotSpeed robotSpeed;     // hızı buradan alıyoruz (Nazife)
-    private RobotBattery battery;      // batarya bitti mi? (Ali)
-    private GroundCheck groundCheck;   // yerde miyiz? (Esra)
-    private InputAction moveAction;    // "Move" action'ı: WASD, oklar, sol çubuk
-    private Vector3 direction;         // oyuncunun gitmek istediği yön
+    private RobotSpeed robotSpeed;
+    private RobotBattery battery;
+    private GroundCheck groundCheck;
+
+    private InputAction moveAction;    // WASD
+    private InputAction lookAction;    // fare
+    private InputAction attackAction;  // sol tık (imleci tekrar kilitlemek için)
+
+    private Vector2 moveInput;   // Update okur, FixedUpdate kullanır
+    private float yaw;           // sağa-sola bakış açısı (robotun tamamı)
+    private float pitch;         // yukarı-aşağı bakış açısı (sadece kamera)
+    private bool controlEnabled = true;
 
     void Start()
     {
-        // Gereken her şeyi bir kere bul ve sakla
         rb = GetComponent<Rigidbody>();
         robotSpeed = GetComponent<RobotSpeed>();
         battery = GetComponent<RobotBattery>();
         groundCheck = GetComponent<GroundCheck>();
+
         moveAction = InputSystem.actions.FindAction("Move");
+        lookAction = InputSystem.actions.FindAction("Look");
+        attackAction = InputSystem.actions.FindAction("Attack");
+
+        yaw = rb.rotation.eulerAngles.y;   // robotun başlangıçta baktığı yönden başla
+        LockCursor(true);
     }
 
     void Update()
     {
-        // Her karede: tuşları ya da çubuğu oku
-        Vector2 input = moveAction.ReadValue<Vector2>();
-        direction = new Vector3(input.x, 0f, input.y);
+        // Market açıkken: hiçbir girdi okuma
+        if (!controlEnabled)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
+        // İmleç serbest kaldıysa (örn. Esc'ye basıldı), sol tıkla tekrar kilitle
+        if (Cursor.lockState != CursorLockMode.Locked && attackAction.WasPressedThisFrame())
+        {
+            LockCursor(true);
+        }
+
+        // Hareket tuşlarını oku
+        moveInput = moveAction.ReadValue<Vector2>();
+
+        // İmleç kilitli değilse bakma (fare pencere dışındayken robot dönmesin)
+        if (Cursor.lockState != CursorLockMode.Locked) return;
+
+        // Fare: son kareden beri kaç piksel kaydı? (deltaTime ile ÇARPILMAZ)
+        Vector2 look = lookAction.ReadValue<Vector2>();
+        yaw += look.x * mouseSensitivity;
+        pitch -= look.y * mouseSensitivity;               // fare yukarı → yukarı bak (açı küçülür)
+        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);   // takla atmasın
+
+        // Pitch'i sadece kameraya uygula
+        if (cameraPivot != null)
+        {
+            cameraPivot.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        }
     }
 
     void FixedUpdate()
     {
-        // Havadaysak direksiyon yok: hareketi fiziğe bırak
+        // Yaw'ı robotun tamamına, fizik yoluyla uygula
+        rb.MoveRotation(Quaternion.Euler(0f, yaw, 0f));
+
+        // Havadaysak direksiyon yok
         if (!groundCheck.IsGrounded()) return;
 
-        // İstediğimiz hız: yön × RobotSpeed'in verdiği hız (çamur, yağ, ağırlık dahil)
-        Vector3 wanted = direction * robotSpeed.GetSpeed();
+        // Robotun ileri ve sağ yönleri (fizik dönüşüne göre)
+        Vector3 forward = rb.rotation * Vector3.forward;
+        Vector3 right = rb.rotation * Vector3.right;
 
-        // Batarya bittiyse robot durmak ister
+        // Baktığımız yöne göre hareket yönü
+        Vector3 direction = forward * moveInput.y + right * moveInput.x;
+        direction = Vector3.ClampMagnitude(direction, 1f);   // çapraz giderken hızlanmasın
+
+        // İstenen hız
+        Vector3 wanted = direction * robotSpeed.GetSpeed();
         if (battery.IsEmpty()) wanted = Vector3.zero;
 
-        // Şu anki hızımız (sadece yatay kısmı; düşme fiziğin işi)
+        // Hıza yavaşça yaklaş. Grip küçükse (yağ) çok yavaş yaklaşır, yani kayar.
         Vector3 v = rb.linearVelocity;
         Vector3 flat = new Vector3(v.x, 0f, v.z);
-
-        // Hızı, istenen hıza biraz yaklaştır (en fazla 'step' kadar)
-        float step = acceleration * Time.fixedDeltaTime;
+        float step = acceleration * robotSpeed.GetGrip() * Time.fixedDeltaTime;
         flat = Vector3.MoveTowards(flat, wanted, step);
         rb.linearVelocity = new Vector3(flat.x, v.y, flat.z);
+    }
 
-        // Dönme: tuşa basılmıyorsa ya da batarya bittiyse dönme
-        if (direction == Vector3.zero) return;
-        if (battery.IsEmpty()) return;
+    // Market açılınca false, kapanınca true (Esra çağırır)
+    public void SetControlEnabled(bool enabled)
+    {
+        controlEnabled = enabled;
+        LockCursor(enabled);
+    }
 
-        Quaternion look = Quaternion.LookRotation(direction);
-        float turn = turnSpeed * Time.fixedDeltaTime;
-        look = Quaternion.RotateTowards(rb.rotation, look, turn);
-        rb.MoveRotation(look);
+    private void LockCursor(bool locked)
+    {
+        if (locked)
+        {
+            Cursor.lockState = CursorLockMode.Locked;   // ekranın ortasına kilitle
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;     // serbest bırak
+            Cursor.visible = true;
+        }
     }
 }
