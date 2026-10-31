@@ -3,7 +3,7 @@ using UnityEngine;
 // SAHİBİ: Ali
 public class RobotBattery : MonoBehaviour
 {
-    [SerializeField] private float maxBattery = 100f;   // tam dolu batarya (market ile artacak)
+    [SerializeField] private float maxBattery = 100f;   // tam dolu batarya (market ile artar)
 
     private float currentBattery;      // şu anki batarya
     private bool emptyMessageShown;    // "bitti" mesajı yazıldı mı?
@@ -48,13 +48,31 @@ public class RobotBattery : MonoBehaviour
         return currentBattery <= 0f;
     }
 
-    // Bataryanın doluluk oranı, 0 ile 1 arası (ileride ekrandaki batarya çubuğu kullanacak)
+    // Bataryanın doluluk oranı, 0 ile 1 arası (ekrandaki batarya çubuğu kullanır)
     public float GetPercent()
     {
         return currentBattery / maxBattery;
     }
-        // ===== 5. HAFTA SÖZLEŞMESİ (Ali dolduracak) =====
 
-    // Maksimum bataryayı artır (market)
-    public void IncreaseMax(float amount) { }
+    // ===== 5. HAFTA =====
+
+    // Maksimum bataryayı artır (Nazife'nin marketi çağırır)
+    public void IncreaseMax(float amount)
+    {
+        if (amount <= 0f) return;   // eksi ya da sıfır artış anlamsız
+        maxBattery += amount;       // şu anki batarya artmaz, istasyonda doldurulur
+        Debug.Log("Max battery: " + maxBattery);
+    }
+
+    // Şu anki batarya (HUD yazısı için)
+    public float GetCurrent()
+    {
+        return currentBattery;
+    }
+
+    // Maksimum batarya (HUD yazısı için)
+    public float GetMax()
+    {
+        return maxBattery;
+    }
 }
