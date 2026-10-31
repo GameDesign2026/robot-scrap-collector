@@ -130,6 +130,8 @@ GameObject:
   - component: {fileID: 768908070761742866}
   - component: {fileID: 8709715359099502017}
   - component: {fileID: 3889061378908686171}
+  - component: {fileID: 2364118764171952040}
+  - component: {fileID: 6481374264774899568}
   m_Layer: 0
   m_Name: Trash_Metal
   m_TagString: Untagged
@@ -186,8 +188,60 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee4da5496bd7fb848aeca45b68273899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrashItem
+  trashType: 1
   value: 5
   weight: 3
-  respawnTime: 8
-  growTime: 0.5
   visual: {fileID: 5304674228070923850}
+  pickupTrigger: {fileID: 8709715359099502017}
+  bodyCollider: {fileID: 6481374264774899568}
+  growTime: 0.5
+  pickupDelay: 0.5
+  throwForce: 3
+--- !u!54 &2364118764171952040
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7410113893520850064}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 112
+  m_CollisionDetection: 0
+--- !u!65 &6481374264774899568
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7410113893520850064}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 0.6, y: 0.6, z: 0.6}
+  m_Center: {x: 0, y: 0.3, z: 0}

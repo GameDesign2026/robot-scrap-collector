@@ -6,93 +6,136 @@ public enum TrashType { Normal, Metal, Electronic }
 // SAHİBİ: Sümeyra
 public class TrashItem : MonoBehaviour
 {
-    [SerializeField] private int value = 1;            // kaç Scrap değerinde
-    [SerializeField] private float weight = 1f;        // ne kadar ağır (robotu yavaşlatacak)
-    [SerializeField] private float respawnTime = 5f;   // toplandıktan kaç saniye sonra geri gelecek
-    [SerializeField] private float growTime = 0.5f;    // geri gelirken kaç saniyede tam boyuta ulaşacak
-    [SerializeField] private Transform visual;         // gizlenip gösterilecek görünüş parçası
+    // Çöpün içinde bulunabileceği durumlar
+    private enum State { OnGround, Carried, Delivered }
 
-    private Collider pickupTrigger;   // toplama alanı (bu objedeki Sphere Collider)
-    private Vector3 fullScale;        // Visual'ın normal boyutu
-    private bool isCollected;         // şu an toplanmış (gizli) mı?
-    private float timer;              // yeniden doğma sayacı
-    private float growTimer;          // büyüme sayacı
+    [Header("Kimlik")]
+    [SerializeField] private TrashType trashType = TrashType.Normal;
+    [SerializeField] private int value = 1;          // kaç Scrap değerinde
+    [SerializeField] private float weight = 1f;      // ne kadar ağır
+
+    [Header("Parçalar")]
+    [SerializeField] private Transform visual;       // görünüş (dönen, süzülen küp)
+    [SerializeField] private Collider pickupTrigger; // alma alanı (Sphere Collider, trigger)
+    [SerializeField] private Collider bodyCollider;  // gövde (Box Collider, sadece fırlatılırken açık)
+
+    [Header("Ayarlar")]
+    [SerializeField] private float growTime = 0.5f;    // doğarken kaç saniyede büyüsün
+    [SerializeField] private float pickupDelay = 0.5f; // atıldıktan kaç saniye sonra alınabilsin
+    [SerializeField] private float throwForce = 3f;    // ne kadar kuvvetle fırlatılsın
+
+    private State state = State.OnGround;
+    private Rigidbody rb;
+    private Renderer visualRenderer;
+    private Color baseColor;        // normal renk (vurgu kalkınca buna dönülür)
+    private Vector3 fullScale;      // Visual'ın normal boyutu
+    private float growTimer;
+    private float canPickUpAt;      // bu zamandan önce alınamaz
+    private TrashSpawner spawner;   // beni kim yarattı? (Nagihan'ın üreticisi)
 
     void Awake()
     {
-        pickupTrigger = GetComponent<Collider>();
+        rb = GetComponent<Rigidbody>();
+        visualRenderer = visual.GetComponent<Renderer>();
+        baseColor = visualRenderer.material.color;
         fullScale = visual.localScale;
-        growTimer = growTime;          // oyun başında büyüme animasyonu olmasın
-    }
 
-    // ALGILA: bir şey toplama alanına girdi
-    void OnTriggerEnter(Collider other)
-    {
-        if (isCollected) return;                                   // zaten toplanmışsa çık
-
-        // KİM? Giren şeyin deposu var mı? (yani robot mu?)
-        RobotStorage storage = other.GetComponent<RobotStorage>();
-        if (storage == null) return;                               // depo yoksa robot değil
-        if (!storage.CanCollect()) return;                         // depo doluysa toplanamaz
-
-        // YAP: çöpü depoya ver ve gizlen
-        storage.AddTrash(value, weight);
-        Collect();
+        // Doğarken sıfır boyuttan başla, Update'te büyüyecek
+        visual.localScale = Vector3.zero;
+        growTimer = 0f;
     }
 
     void Update()
     {
-        // Toplandıysa: sayaç ilerlesin, süre dolunca geri gel
-        if (isCollected)
-        {
-            timer += Time.deltaTime;
-            if (timer >= respawnTime)
-            {
-                Respawn();
-            }
-            return;
-        }
-
-        // Yeni geri geldiyse: küçükten büyüsün
+        // Doğma animasyonu: küçükten büyüye
         if (growTimer < growTime)
         {
             growTimer += Time.deltaTime;
             float growth = growTimer / growTime;
-            if (growth > 1f)
-            {
-                growth = 1f;
-            }
+            if (growth > 1f) growth = 1f;
             visual.localScale = fullScale * growth;
         }
     }
 
-    private void Collect()
+    void FixedUpdate()
     {
-        isCollected = true;
-        timer = 0f;
+        // Sadece fırlatılmışken: yere oturdu mu?
+        if (rb.isKinematic) return;                       // zaten duruyor
+        if (Time.time < canPickUpAt) return;              // daha yeni atıldı, biraz bekle
+        if (rb.linearVelocity.magnitude > 0.05f) return;  // hâlâ hareket ediyor
+
+        // Durdu: fiziği kapat, gövdeyi kapat (robot artık çarpmasın)
+        rb.isKinematic = true;
+        bodyCollider.enabled = false;
+    }
+
+    // ===== SÖZLEŞME =====
+
+    // Şu an alınabilir mi?
+    public bool CanBePickedUp()
+    {
+        return state == State.OnGround && Time.time >= canPickUpAt;
+    }
+
+    // E ile alındı (RobotInteractor çağırır)
+    public void OnPickedUp()
+    {
+        state = State.Carried;
+        SetHighlight(false);
         visual.gameObject.SetActive(false);   // görünmez ol
-        pickupTrigger.enabled = false;        // bir daha toplanamasın
-        Debug.Log(name + " collected (+" + value + ")");
+        pickupTrigger.enabled = false;        // bakılınca bulunmasın
+        bodyCollider.enabled = false;
+        rb.isKinematic = true;                // fizik dursun
     }
 
-    private void Respawn()
+    // Q ile bırakıldı (Furkan'ın RobotStorage'ı çağırır)
+    public void OnDropped(Vector3 position, Vector3 throwDirection)
     {
-        isCollected = false;
-        growTimer = 0f;
-        visual.localScale = Vector3.zero;     // sıfır boyuttan başla
-        visual.gameObject.SetActive(true);    // tekrar görün
-        pickupTrigger.enabled = true;         // tekrar toplanabilsin
-        Debug.Log(name + " respawned");
-    }
-        // ===== 5. HAFTA SÖZLEŞMESİ (Sümeyra dolduracak) =====
+        state = State.OnGround;
+        transform.position = position;
 
-    public bool CanBePickedUp() { return true; }
-    public void OnPickedUp() { }
-    public void OnDropped(Vector3 position, Vector3 throwDirection) { }
-    public void OnDelivered() { }
+        visual.gameObject.SetActive(true);
+        visual.localScale = fullScale;
+        growTimer = growTime;                 // atılınca büyüme animasyonu olmasın
+
+        pickupTrigger.enabled = true;
+        bodyCollider.enabled = true;          // yere çarpabilsin
+
+        rb.isKinematic = false;               // fizik başlasın
+        rb.linearVelocity = Vector3.zero;
+        Vector3 push = throwDirection.normalized + Vector3.up;   // ileri ve yukarı
+        rb.AddForce(push * throwForce, ForceMode.Impulse);
+
+        canPickUpAt = Time.time + pickupDelay;   // hemen geri alınmasın
+    }
+
+    // Teslim edildi (Furkan'ın RobotStorage'ı çağırır)
+    public void OnDelivered()
+    {
+        state = State.Delivered;
+        if (spawner != null) spawner.OnTrashRemoved(this);   // üreticiye haber ver
+        Destroy(gameObject);                                  // sahneden sil
+    }
+
     public int GetValue() { return value; }
     public float GetWeight() { return weight; }
-    public TrashType GetTrashType() { return TrashType.Normal; }
-    public void SetHighlight(bool on) { }
-    public void SetSpawner(TrashSpawner spawner) { }
+    public TrashType GetTrashType() { return trashType; }
+
+    // Bakılınca parla
+    public void SetHighlight(bool on)
+    {
+        if (on)
+        {
+            visualRenderer.material.color = Color.Lerp(baseColor, Color.white, 0.5f);
+        }
+        else
+        {
+            visualRenderer.material.color = baseColor;
+        }
+    }
+
+    public void SetSpawner(TrashSpawner newSpawner)
+    {
+        spawner = newSpawner;
+    }
 }
