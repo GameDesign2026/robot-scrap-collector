@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1060879580517421083
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2194399006944980917}
+  - component: {fileID: 9084195012300843242}
+  m_Layer: 0
+  m_Name: TrashSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2194399006944980917
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1060879580517421083}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9084195012300843242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1060879580517421083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed75eb18be6da504b85a6c4f3d5baa22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrashSpawner
+  normalPrefab: {fileID: 6377596487642037884, guid: e9be34caf265d8b459c4f8f79ddc06e1, type: 3}
+  metalPrefab: {fileID: 3889061378908686171, guid: b88135a4fe1a15a448f639b4d1257f7e, type: 3}
+  electronicPrefab: {fileID: 1761934997927889671, guid: 6a197c5ef50c5c5499f58e77e6284f34, type: 3}
+  normalChance: 65
+  metalChance: 27
+  electronicChance: 8
+  maxTrash: 8
+  respawnDelay: 5
+  areaMin: {x: -18, y: -18}
+  areaMax: {x: 18, y: 18}
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 8
+  clearRadius: 1
+  noSpawnZones: []
+  maxTries: 20
