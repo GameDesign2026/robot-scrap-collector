@@ -1,20 +1,20 @@
 using UnityEngine;
 
-// SAHİBİ: Nazife
+// SAHİBİ: Nazife — çamur ve yağ bölgeleri
 public class SurfaceZone : MonoBehaviour
 {
     [SerializeField] private float speedMultiplier = 0.5f;   // çamur 0.5, yağ 1.5
+    [SerializeField] private float grip = 1f;                // çamur 1, yağ 0.15 (küçük = kaygan)
 
     // Robot bölgeye GİRDİĞİNDE
     void OnTriggerEnter(Collider other)
     {
-        // KİM? Giren şeyin hız bileşeni var mı? (yani robot mu?)
         RobotSpeed speed = other.GetComponent<RobotSpeed>();
         if (speed == null) return;
 
-        // YAP: hızı değiştir
         speed.SetSurface(speedMultiplier);
-        Debug.Log(name + ": speed x" + speedMultiplier);
+        speed.SetGrip(grip);
+        Debug.Log(name + ": speed x" + speedMultiplier + " · grip " + grip);
     }
 
     // Robot bölgeden ÇIKTIĞINDA
@@ -23,8 +23,7 @@ public class SurfaceZone : MonoBehaviour
         RobotSpeed speed = other.GetComponent<RobotSpeed>();
         if (speed == null) return;
 
-        // YAP: normal hıza dön
-        speed.ResetSurface();
-        Debug.Log(name + ": speed back to normal");
+        speed.ResetSurface();   // hem hız hem grip normale döner
+        Debug.Log(name + ": back to normal");
     }
 }

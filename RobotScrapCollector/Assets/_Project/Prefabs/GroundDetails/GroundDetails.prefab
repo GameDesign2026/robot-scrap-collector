@@ -377,6 +377,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurfaceZone
   speedMultiplier: 0.5
+  grip: 1
 --- !u!1 &7660572335112101229
 GameObject:
   m_ObjectHideFlags: 0
@@ -444,6 +445,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurfaceZone
   speedMultiplier: 1.5
+  grip: 0.15
 --- !u!1 &7779135881711393937
 GameObject:
   m_ObjectHideFlags: 0
@@ -601,6 +603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurfaceZone
   speedMultiplier: 0.5
+  grip: 1
 --- !u!1 &8493846490237716663
 GameObject:
   m_ObjectHideFlags: 0
@@ -758,3 +761,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurfaceZone
   speedMultiplier: 1.5
+  grip: 0.15

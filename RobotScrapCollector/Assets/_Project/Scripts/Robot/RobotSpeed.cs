@@ -3,20 +3,20 @@ using UnityEngine;
 // SAHİBİ: Nazife
 public class RobotSpeed : MonoBehaviour
 {
-    [SerializeField] private float baseSpeed = 3f;          // normal hız (market ile artacak)
-    [SerializeField] private float slowPerWeight = 0.1f;    // her 1 ağırlık hızı ne kadar düşürür (0.1 = %10)
-    [SerializeField] private float minWeightFactor = 0.4f;  // ağırlık hızı en fazla bu orana kadar düşürebilir
+    [SerializeField] private float baseSpeed = 3f;          // normal hız (market ile artar)
+    [SerializeField] private float slowPerWeight = 0.1f;    // her 1 ağırlık hızı ne kadar düşürür
+    [SerializeField] private float minWeightFactor = 0.4f;  // ağırlık hızı en fazla bu orana düşürebilir
 
-    private float surfaceMultiplier = 1f;   // zemin çarpanı: normal 1, çamur 0.5, yağ 1.5
-    private RobotStorage storage;           // ağırlığı buradan soracağız (Furkan'ın script'i)
+    private float surfaceMultiplier = 1f;   // zemin hız çarpanı: normal 1, çamur 0.5, yağ 1.5
+    private float grip = 1f;                // zemin tutuşu: normal 1, yağ 0.15
+    private RobotStorage storage;
 
     void Awake()
     {
-        // Aynı robottaki depoyu bir kere bul ve sakla
         storage = GetComponent<RobotStorage>();
     }
 
-    // ----- ZEMİN (geçen haftadan, değişmedi) -----
+    // ----- ZEMİN -----
 
     public void SetSurface(float multiplier)
     {
@@ -24,9 +24,11 @@ public class RobotSpeed : MonoBehaviour
         surfaceMultiplier = multiplier;
     }
 
+    // Zeminden çıkınca hem hız çarpanı hem tutuş normale döner
     public void ResetSurface()
     {
         surfaceMultiplier = 1f;
+        grip = 1f;
     }
 
     public float GetMultiplier()
@@ -34,33 +36,42 @@ public class RobotSpeed : MonoBehaviour
         return surfaceMultiplier;
     }
 
-    // ----- AĞIRLIK (yeni) -----
+    // ----- GRIP (yeni) -----
 
-    // Taşınan ağırlığa göre hız çarpanı: boşken 1, ağırlaştıkça azalır
+    public float GetGrip()
+    {
+        return grip;
+    }
+
+    public void SetGrip(float newGrip)
+    {
+        // 0.01 ile 1 arasında tut: 0 olursa robot hiç hızlanamaz, 1'den büyük anlamsız
+        grip = Mathf.Clamp(newGrip, 0.01f, 1f);
+    }
+
+    // ----- MARKET (yeni) -----
+
+    public void IncreaseBaseSpeed(float amount)
+    {
+        if (amount <= 0f) return;   // eksi ya da sıfır artış anlamsız
+        baseSpeed += amount;
+        Debug.Log("Base speed: " + baseSpeed);
+    }
+
+    // ----- AĞIRLIK (geçen hafta) -----
+
     public float GetWeightFactor()
     {
-        if (storage == null) return 1f;   // depo yoksa ağırlık da yok
-
+        if (storage == null) return 1f;
         float weight = storage.GetCarriedWeight();
         float factor = 1f - weight * slowPerWeight;
-
-        // Alt sınır: hız hiçbir zaman minWeightFactor'ın altına inmesin
         return Mathf.Max(factor, minWeightFactor);
     }
 
     // ----- SONUÇ -----
 
-    // Robotun şu anki gerçek hızı (RobotMove her fizik adımında bunu sorar)
     public float GetSpeed()
     {
         return baseSpeed * surfaceMultiplier * GetWeightFactor();
     }
-        // ===== 5. HAFTA SÖZLEŞMESİ (Nazife dolduracak) =====
-
-    // Temel hızı artır (market)
-    public void IncreaseBaseSpeed(float amount) { }
-
-    // Zemin tutuşu: 1 = normal, küçük = kaygan (yağ)
-    public float GetGrip() { return 1f; }
-    public void SetGrip(float grip) { }
 }
