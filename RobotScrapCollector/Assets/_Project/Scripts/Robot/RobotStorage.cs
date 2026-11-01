@@ -1,95 +1,202 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-// SAHİBİ: Furkan
+// SAHİBİ: Furkan — slotlu envanter
 public class RobotStorage : MonoBehaviour
 {
-    [SerializeField] private int capacity = 1;   // aynı anda kaç çöp taşıyabilir (market ile artacak)
+    [SerializeField] private int maxSlots = 5;          // toplam slot (kilitliler dahil)
+    [SerializeField] private int unlockedSlots = 1;     // başta kaç slot açık
+    [SerializeField] private float dropDistance = 1.2f; // çöp robotun ne kadar önüne atılsın
+    [SerializeField] private float dropHeight = 0.8f;   // ne kadar yukarıdan atılsın
 
-    private int itemCount;        // şu an depoda kaç çöp var
-    private int carriedValue;     // depodaki çöplerin toplam değeri
-    private float carriedWeight;  // depodaki çöplerin toplam ağırlığı
-    private int scrap;            // teslim edilip kazanılan toplam Scrap
+    private TrashItem[] slots;      // slotlar: her biri bir çöp ya da null (boş)
+    private int selectedIndex;      // seçili slot (0'dan başlar)
+    private int scrap;              // toplam kazanılan Scrap
 
-    // Depoda yer var mı?
+    private InputAction dropAction;     // Q
+    private InputAction scrollAction;   // fare tekerleği
+
+    void Awake()
+    {
+        // 5 boş kutuluk diziyi oluştur
+        slots = new TrashItem[maxSlots];
+    }
+
+    void Start()
+    {
+        dropAction = InputSystem.actions.FindAction("Drop");
+        scrollAction = InputSystem.actions.FindAction("SlotScroll");
+    }
+
+    void Update()
+    {
+        ReadNumberKeys();
+        ReadScroll();
+
+        // Q: seçili slottaki çöpü at
+        if (dropAction != null && dropAction.WasPressedThisFrame())
+        {
+            DropSelected();
+        }
+    }
+
+    // ===== SLOT SEÇİMİ =====
+
+    // 1–5 tuşları (doğrudan klavyeden)
+    private void ReadNumberKeys()
+    {
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null) return;   // klavye takılı değilse
+
+        if (keyboard.digit1Key.wasPressedThisFrame) SelectSlot(0);
+        if (keyboard.digit2Key.wasPressedThisFrame) SelectSlot(1);
+        if (keyboard.digit3Key.wasPressedThisFrame) SelectSlot(2);
+        if (keyboard.digit4Key.wasPressedThisFrame) SelectSlot(3);
+        if (keyboard.digit5Key.wasPressedThisFrame) SelectSlot(4);
+    }
+
+    // Fare tekerleği (action ile): aşağı = sonraki, yukarı = önceki
+    private void ReadScroll()
+    {
+        if (scrollAction == null) return;
+
+        float scroll = scrollAction.ReadValue<float>();
+        if (scroll < 0f) SelectSlot((selectedIndex + 1) % unlockedSlots);
+        if (scroll > 0f) SelectSlot((selectedIndex - 1 + unlockedSlots) % unlockedSlots);
+    }
+
+    private void SelectSlot(int index)
+    {
+        if (index < 0 || index >= unlockedSlots) return;   // kilitli slot seçilemez
+        selectedIndex = index;
+    }
+
+    // ===== ÇÖP ALMA (Sümeyra'nın etkileşimi çağırır) =====
+
+    // Açık slotlardan en az biri boş mu?
     public bool CanCollect()
     {
-        return itemCount < capacity;
+        for (int i = 0; i < unlockedSlots; i++)
+        {
+            if (slots[i] == null) return true;
+        }
+        return false;
     }
 
-    // Depoya bir çöp ekle
-    public void AddTrash(int value, float weight)
+    // Çöpü ilk boş slota koy. Koyabildiyse true. (Çöpü gizlemez, onu Sümeyra yapar.)
+    public bool TryAddItem(TrashItem item)
     {
-        if (!CanCollect()) return;   // kontrol: yer yoksa hiçbir şey yapma
+        if (item == null) return false;
 
-        itemCount++;
-        carriedValue += value;
-        carriedWeight += weight;
-
-        Debug.Log("Storage " + itemCount + "/" + capacity
-                  + " · value " + carriedValue
-                  + " · weight " + carriedWeight);
+        for (int i = 0; i < unlockedSlots; i++)
+        {
+            if (slots[i] == null)
+            {
+                slots[i] = item;
+                Debug.Log(item.name + " → slot " + (i + 1));
+                return true;
+            }
+        }
+        return false;   // boş slot yok
     }
 
-    // Depoyu boşalt, taşınan değeri Scrap'e çevir
+    // ===== ÇÖP ATMA (Q) =====
+
+    public void DropSelected()
+    {
+        TrashItem item = slots[selectedIndex];
+        if (item == null) return;   // seçili slot boş
+
+        slots[selectedIndex] = null;   // slotu boşalt
+
+        // Atılacak nokta: robotun önü, biraz yukarısı
+        Vector3 start = transform.position + Vector3.up * dropHeight;
+        Vector3 forward = transform.forward;
+        float distance = dropDistance;
+
+        // Önümüzde duvar varsa çöp duvarın içine girmesin: duvarın biraz önüne koy
+        RaycastHit hit;
+        if (Physics.Raycast(start, forward, out hit, dropDistance, ~0, QueryTriggerInteraction.Ignore))
+        {
+            distance = hit.distance - 0.3f;
+            if (distance < 0f) distance = 0f;
+        }
+
+        Vector3 dropPosition = start + forward * distance;
+        item.OnDropped(dropPosition, forward);   // Sümeyra'nın fonksiyonu: görünür ol, fırla
+    }
+
+    // ===== TESLİM (Esra'nın teslim noktası çağırır) =====
+
     public void Unload()
     {
-        if (itemCount == 0) return;  // kontrol: depo boşsa hiçbir şey yapma
+        int total = 0;
 
-        scrap += carriedValue;
-        Debug.Log("Delivered " + carriedValue + " · Scrap: " + scrap);
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] == null) continue;   // boş slotu atla
 
-        itemCount = 0;
-        carriedValue = 0;
-        carriedWeight = 0f;
+            total += slots[i].GetValue();
+            slots[i].OnDelivered();   // Sümeyra'nın fonksiyonu: üreticiye haber ver, yok ol
+            slots[i] = null;
+        }
+
+        if (total == 0) return;   // teslim edilecek bir şey yoktu
+
+        scrap += total;
+        Debug.Log("Delivered " + total + " · Scrap: " + scrap);
     }
 
-    // Toplam Scrap
-    public int GetScrap()
+    // ===== MARKET (Nazife'nin UpgradeShop'u çağırır) =====
+
+    public void UnlockSlot()
     {
-        return scrap;
+        if (unlockedSlots >= maxSlots) return;   // zaten hepsi açık
+        unlockedSlots++;
     }
-
-    // Taşınan toplam ağırlık (4. haftada robot ağırken yavaşlayacak)
-    public float GetCarriedWeight()
-    {
-        return carriedWeight;
-
-    }
-    public int GetItemCount()
-    {
-        return itemCount;
-    }
-
-    // Kapasite kaç (ileride ekrandaki "Storage 1/1" yazısı kullanacak)
-    public int GetCapacity()
-    {
-        return capacity;
-    }
-        // ===== 5. HAFTA SÖZLEŞMESİ (Furkan dolduracak) =====
-
-    // Çöpü boş bir slota koymaya çalış. Koyabildiyse true.
-    public bool TryAddItem(TrashItem item) { return false; }
-
-    // Seçili slottaki çöpü yere bırak (Q)
-    public void DropSelected() { }
-
-    // Seçili slotun numarası (0'dan başlar)
-    public int GetSelectedIndex() { return 0; }
-
-    // Kaç slot açık (başta 1)
-    public int GetUnlockedSlots() { return 1; }
-
-    // Toplam slot sayısı (kilitliler dahil)
-    public int GetMaxSlots() { return 5; }
-
-    // Bu slotta hangi çöp var? (boşsa null)
-    public TrashItem GetItemInSlot(int index) { return null; }
-
-    // Bir slot daha aç (market)
-    public void UnlockSlot() { }
 
     // Scrap harca. Yeterliyse düşer ve true döner.
-    public bool SpendScrap(int amount) { return false; }
+    public bool SpendScrap(int amount)
+    {
+        if (amount < 0) return false;
+        if (scrap < amount) return false;   // yetmiyor
+        scrap -= amount;
+        return true;
+    }
 
+    // ===== BİLGİ (diğer script'ler okur) =====
 
+    public int GetScrap() { return scrap; }
+    public int GetSelectedIndex() { return selectedIndex; }
+    public int GetUnlockedSlots() { return unlockedSlots; }
+    public int GetMaxSlots() { return slots.Length; }
+    public int GetCapacity() { return unlockedSlots; }
+
+    public TrashItem GetItemInSlot(int index)
+    {
+        if (index < 0 || index >= slots.Length) return null;   // geçersiz numara
+        return slots[index];
+    }
+
+    // Kaç slot dolu
+    public int GetItemCount()
+    {
+        int count = 0;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] != null) count++;
+        }
+        return count;
+    }
+
+    // Taşınan toplam ağırlık
+    public float GetCarriedWeight()
+    {
+        float total = 0f;
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] != null) total += slots[i].GetWeight();
+        }
+        return total;
+    }
 }
