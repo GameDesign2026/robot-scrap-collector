@@ -146,4 +146,11 @@ public class TrashItem : MonoBehaviour
     {
         spawner = newSpawner;
     }
+        // ===== AŞAMA 2 SÖZLEŞMESİ (Sümeyra dolduracak) =====
+
+    // Yaya fırlattı: çöp bu hızla havaya fırlar (Nagihan çağırır)
+    public void Launch(Vector3 velocity) { }
+
+    // Çöp şu an havada mı? (Aşama 3'te sopa sorar)
+    public bool IsInAir() { return false; }
 }
