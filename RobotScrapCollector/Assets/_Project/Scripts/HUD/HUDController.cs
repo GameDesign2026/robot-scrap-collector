@@ -13,22 +13,23 @@ public class HUDController : MonoBehaviour
     [SerializeField] private Image batteryFill;
     [SerializeField] private TMP_Text batteryText;
     [SerializeField] private TMP_Text scrapText;
+    [SerializeField] private TMP_Text chargingText;   // YENİ: "ŞARJ OLUYOR"
 
     [Header("Renkler")]
-    [SerializeField] private Color highColor = new Color(0.24f, 0.86f, 0.52f);   // yeşil (%50 üstü)
-    [SerializeField] private Color midColor = new Color(1f, 0.84f, 0.31f);       // sarı (%25–50)
-    [SerializeField] private Color lowColor = new Color(0.9f, 0.22f, 0.21f);     // kırmızı (%25 altı)
+    [SerializeField] private Color highColor = new Color(0.24f, 0.86f, 0.52f);
+    [SerializeField] private Color midColor = new Color(1f, 0.84f, 0.31f);
+    [SerializeField] private Color lowColor = new Color(0.9f, 0.22f, 0.21f);
+    [SerializeField] private Color chargeColor = new Color(0.31f, 0.76f, 0.97f);   // YENİ: açık mavi
 
     [Header("Uyarı")]
-    [SerializeField] private float warningLevel = 0.25f;   // bunun altında yanıp sön
-    [SerializeField] private float blinkInterval = 0.3f;   // kaç saniyede bir
+    [SerializeField] private float warningLevel = 0.25f;
+    [SerializeField] private float blinkInterval = 0.3f;
 
     private float timer;
     private bool blinkOn;
 
     void Start()
     {
-        // Slotlar boşsa "Player" tag'li robotu bul
         if (battery == null || storage == null)
         {
             GameObject robot = GameObject.FindWithTag("Player");
@@ -51,11 +52,8 @@ public class HUDController : MonoBehaviour
         if (battery == null || batteryFill == null) return;
 
         float percent = battery.GetPercent();
-
-        // 1) Çubuğun doluluğu
         batteryFill.fillAmount = percent;
 
-        // 2) Sayı: "72 / 100" (küsuratsız)
         if (batteryText != null)
         {
             int current = Mathf.CeilToInt(battery.GetCurrent());
@@ -63,10 +61,24 @@ public class HUDController : MonoBehaviour
             batteryText.text = current + " / " + max;
         }
 
-        // 3) Renk
+        // YENİ: şarj oluyorsa açık mavi ve yazı görünür
+        bool isCharging = battery.IsCharging();
+        if (chargingText != null) chargingText.gameObject.SetActive(isCharging);
+
+        if (isCharging)
+        {
+            // Hafifçe nabız gibi atsın: parlaklık 0.7 ile 1 arasında gidip gelir
+            float pulse = 0.85f + Mathf.Sin(Time.time * 6f) * 0.15f;
+            batteryFill.color = chargeColor * pulse;
+            timer = 0f;
+            blinkOn = false;
+            return;
+        }
+
+        // Aşağısı 5. haftadakiyle aynı
         if (battery.IsEmpty())
         {
-            batteryFill.color = lowColor;   // bitti: sürekli kırmızı
+            batteryFill.color = lowColor;
             return;
         }
 
@@ -86,7 +98,6 @@ public class HUDController : MonoBehaviour
             return;
         }
 
-        // %25'in altı: kırmızı ile koyu kırmızı arasında yanıp sön
         timer += Time.deltaTime;
         if (timer >= blinkInterval)
         {
@@ -94,14 +105,8 @@ public class HUDController : MonoBehaviour
             blinkOn = !blinkOn;
         }
 
-        if (blinkOn)
-        {
-            batteryFill.color = lowColor;
-        }
-        else
-        {
-            batteryFill.color = lowColor * 0.4f;   // aynı renk, %40 parlaklık
-        }
+        if (blinkOn) batteryFill.color = lowColor;
+        else batteryFill.color = lowColor * 0.4f;
     }
 
     private void UpdateScrap()
