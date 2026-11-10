@@ -75,4 +75,11 @@ public class RobotBattery : MonoBehaviour
     {
         return maxBattery;
     }
+        // ===== AŞAMA 1 SÖZLEŞMESİ (Ali dolduracak) =====
+
+    // Markete girince true, çıkınca false (Esra'nın MarketZone'u çağırır)
+    public void SetCharging(bool charging) { }
+
+    // Şu an şarj oluyor mu? (BatteryUsage ve HUD sorar)
+    public bool IsCharging() { return false; }
 }

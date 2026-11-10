@@ -138,4 +138,8 @@ public class TrashItem : MonoBehaviour
     {
         spawner = newSpawner;
     }
+        // ===== AŞAMA 1 SÖZLEŞMESİ (Sümeyra dolduracak) =====
+
+    // Bu çöpün veri dosyası (hotbar rengi için Nagihan kullanır)
+    public TrashData GetData() { return null; }
 }

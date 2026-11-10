@@ -115,6 +115,16 @@
                     "interactions": "",
                     "initialStateCheck": true,
                     "priority": 0
+                },
+                {
+                    "name": "CameraToggle",
+                    "type": "Button",
+                    "id": "96f5621a-ebfa-4b21-9e7d-8aff152fac1d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -533,6 +543,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "SlotScroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2dce50cb-c4d3-4dd6-8b24-a1689df3838d",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d8e7893f-49de-4f7a-b7f4-05202359a6ca",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraToggle",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
