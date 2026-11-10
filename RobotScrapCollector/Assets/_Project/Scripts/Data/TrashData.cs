@@ -1,13 +1,27 @@
 using UnityEngine;
 
-// SAHİBİ: Nagihan. İSKELET: fonksiyon adlarını değiştirmeyin.
-// Bir çöp türünün verisi (elma, teneke, kahve kutusu, telefon)
+// SAHİBİ: Nagihan — bir çöp türünün verisi
+[CreateAssetMenu(menuName = "Robot Scrap/Trash Data", fileName = "TD_New")]
 public class TrashData : ScriptableObject
 {
-    public string GetDisplayName() { return ""; }
-    public int GetValue() { return 0; }
-    public float GetWeight() { return 0f; }
-    public float GetChance() { return 0f; }
-    public Color GetColor() { return Color.white; }
-    public TrashItem GetPrefab() { return null; }
+    [SerializeField] private string displayName = "Çöp";
+    [SerializeField] private int value = 1;
+    [SerializeField] private float weight = 1f;
+    [SerializeField] private float chance = 10f;
+    [SerializeField] private Color color = Color.white;
+    [SerializeField] private TrashItem prefab;
+
+    public string GetDisplayName() { return displayName; }
+    public int GetValue() { return value; }
+    public float GetWeight() { return weight; }
+    public float GetChance() { return chance; }
+    public Color GetColor() { return color; }
+    public TrashItem GetPrefab() { return prefab; }
+
+    void OnValidate()
+    {
+        if (value < 0) value = 0;
+        if (weight < 0f) weight = 0f;
+        if (chance < 0f) chance = 0f;
+    }
 }

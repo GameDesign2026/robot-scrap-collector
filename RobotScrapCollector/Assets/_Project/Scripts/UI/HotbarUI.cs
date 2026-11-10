@@ -14,11 +14,6 @@ public class HotbarUI : MonoBehaviour
     [SerializeField] private Color lockedColor = new Color(0f, 0f, 0f, 0.9f);
     [SerializeField] private Color selectedColor = new Color(1f, 1f, 1f, 0.6f);
 
-    [Header("Çöp renkleri (yerdeki çöplerle aynı)")]
-    [SerializeField] private Color normalColor = new Color(0.42f, 0.39f, 0.35f);
-    [SerializeField] private Color metalColor = new Color(0.85f, 0.47f, 0.17f);
-    [SerializeField] private Color electronicColor = new Color(0.18f, 0.8f, 0.44f);
-
     void Start()
     {
         if (storage == null)
@@ -60,21 +55,16 @@ public class HotbarUI : MonoBehaviour
             else
             {
                 slotIcons[i].enabled = true;
-                slotIcons[i].color = GetColorFor(item.GetTrashType());
+                slotIcons[i].color = GetColorFor(item);
             }
         }
     }
 
-    private Color GetColorFor(TrashType type)
+    // Çöpün rengi: veri dosyasından
+    private Color GetColorFor(TrashItem item)
     {
-        switch (type)
-        {
-            case TrashType.Metal:
-                return metalColor;
-            case TrashType.Electronic:
-                return electronicColor;
-            default:
-                return normalColor;
-        }
+        TrashData data = item.GetData();
+        if (data == null) return Color.white;
+        return data.GetColor();
     }
 }
