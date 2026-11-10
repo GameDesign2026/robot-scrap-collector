@@ -61,6 +61,7 @@ GameObject:
   - component: {fileID: 6115650454935157523}
   - component: {fileID: 3625801416580665170}
   - component: {fileID: 4046941722646249787}
+  - component: {fileID: 8904244336819366201}
   - component: {fileID: 2637048553270229742}
   m_Layer: 0
   m_Name: CM_FPS
@@ -139,6 +140,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36d1163fa822e8b418a0a603ec078d5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineHardLockToTarget
+  Damping: 0
+--- !u!114 &8904244336819366201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2894208854946934467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4afa82ae3200b82408d605c3dbdd1e38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineRotateWithFollowTarget
   Damping: 0
 --- !u!114 &2637048553270229742
 MonoBehaviour:
