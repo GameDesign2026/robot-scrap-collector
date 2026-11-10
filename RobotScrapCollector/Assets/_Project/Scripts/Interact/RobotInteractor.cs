@@ -5,7 +5,7 @@ using TMPro;
 // SAHİBİ: Sümeyra — bakılan çöpü bulur, vurgular, E ile alır
 public class RobotInteractor : MonoBehaviour
 {
-    [SerializeField] private Camera cam;              // robotun kamerası (RobotCamera)
+    [SerializeField] private Transform rayOrigin;     // ışının çıktığı yer (robotun CameraPivot'u)
     [SerializeField] private float range = 2.5f;      // en fazla kaç metre uzaktaki çöp alınabilir
     [SerializeField] private TMP_Text promptText;     // ekrandaki "E – Al" yazısı
 
@@ -16,6 +16,9 @@ public class RobotInteractor : MonoBehaviour
     void Awake()
     {
         storage = GetComponent<RobotStorage>();
+
+        // Slot boşsa robotun CameraPivot'unu kendisi bul
+        if (rayOrigin == null) rayOrigin = transform.Find("CameraPivot");
     }
 
     void Start()
@@ -71,9 +74,9 @@ public class RobotInteractor : MonoBehaviour
     // Kameradan ileri ışın gönder, en yakın alınabilir çöpü bul
     private TrashItem FindTarget()
     {
-        if (cam == null) return null;
+        if (rayOrigin == null) return null;
 
-        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
 
         // Işının çarptığı HER ŞEY (trigger'lar dahil)
         RaycastHit[] hits = Physics.RaycastAll(ray, range, ~0, QueryTriggerInteraction.Collide);

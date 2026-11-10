@@ -1,53 +1,60 @@
 using UnityEngine;
 
-// Çöp türleri (hotbar renkleri ve üretici kullanıyor)
+// ESKİ: Aşama 2'de silinecek (eski kodlar derlenmeye devam etsin diye şimdilik duruyor)
 public enum TrashType { Normal, Metal, Electronic }
 
 // SAHİBİ: Sümeyra
 public class TrashItem : MonoBehaviour
 {
-    // Çöpün içinde bulunabileceği durumlar
     private enum State { OnGround, Carried, Delivered }
 
-    [Header("Kimlik")]
-    [SerializeField] private TrashType trashType = TrashType.Normal;
-    [SerializeField] private int value = 1;          // kaç Scrap değerinde
-    [SerializeField] private float weight = 1f;      // ne kadar ağır
+    [Header("Veri (Nagihan'ın dosyası)")]
+    [SerializeField] private TrashData data;         // TD_Apple, TD_Can, TD_Coffee ya da TD_Phone
 
     [Header("Parçalar")]
-    [SerializeField] private Transform visual;       // görünüş (dönen, süzülen küp)
-    [SerializeField] private Collider pickupTrigger; // alma alanı (Sphere Collider, trigger)
-    [SerializeField] private Collider bodyCollider;  // gövde (Box Collider, sadece fırlatılırken açık)
+    [SerializeField] private Transform visual;
+    [SerializeField] private Collider pickupTrigger;
+    [SerializeField] private Collider bodyCollider;
 
     [Header("Ayarlar")]
-    [SerializeField] private float growTime = 0.5f;    // doğarken kaç saniyede büyüsün
-    [SerializeField] private float pickupDelay = 0.5f; // atıldıktan kaç saniye sonra alınabilsin
-    [SerializeField] private float throwForce = 3f;    // ne kadar kuvvetle fırlatılsın
+    [SerializeField] private float growTime = 0.5f;
+    [SerializeField] private float pickupDelay = 0.5f;
+    [SerializeField] private float throwForce = 3f;
 
     private State state = State.OnGround;
     private Rigidbody rb;
     private Renderer visualRenderer;
-    private Color baseColor;        // normal renk (vurgu kalkınca buna dönülür)
-    private Vector3 fullScale;      // Visual'ın normal boyutu
+    private Color baseColor;
+    private Vector3 fullScale;
     private float growTimer;
-    private float canPickUpAt;      // bu zamandan önce alınamaz
-    private TrashSpawner spawner;   // beni kim yarattı? (Nagihan'ın üreticisi)
+    private float canPickUpAt;
+    private TrashSpawner spawner;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         visualRenderer = visual.GetComponent<Renderer>();
+
+        // Veri slotu boşsa KIRMIZI hata: sessizce yanlış çalışmasın
+        if (data == null)
+        {
+            Debug.LogError(name + ": TrashData yok! Prefabın Data slotunu doldur.");
+        }
+        else
+        {
+            // Rengi veri dosyasından al (bu çöpe özel kopya üzerinde)
+            visualRenderer.material.color = data.GetColor();
+        }
+
         baseColor = visualRenderer.material.color;
         fullScale = visual.localScale;
 
-        // Doğarken sıfır boyuttan başla, Update'te büyüyecek
         visual.localScale = Vector3.zero;
         growTimer = 0f;
     }
 
     void Update()
     {
-        // Doğma animasyonu: küçükten büyüye
         if (growTimer < growTime)
         {
             growTimer += Time.deltaTime;
@@ -59,36 +66,31 @@ public class TrashItem : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Sadece fırlatılmışken: yere oturdu mu?
-        if (rb.isKinematic) return;                       // zaten duruyor
-        if (Time.time < canPickUpAt) return;              // daha yeni atıldı, biraz bekle
-        if (rb.linearVelocity.magnitude > 0.05f) return;  // hâlâ hareket ediyor
+        if (rb.isKinematic) return;
+        if (Time.time < canPickUpAt) return;
+        if (rb.linearVelocity.magnitude > 0.05f) return;
 
-        // Durdu: fiziği kapat, gövdeyi kapat (robot artık çarpmasın)
         rb.isKinematic = true;
         bodyCollider.enabled = false;
     }
 
     // ===== SÖZLEŞME =====
 
-    // Şu an alınabilir mi?
     public bool CanBePickedUp()
     {
         return state == State.OnGround && Time.time >= canPickUpAt;
     }
 
-    // E ile alındı (RobotInteractor çağırır)
     public void OnPickedUp()
     {
         state = State.Carried;
         SetHighlight(false);
-        visual.gameObject.SetActive(false);   // görünmez ol
-        pickupTrigger.enabled = false;        // bakılınca bulunmasın
+        visual.gameObject.SetActive(false);
+        pickupTrigger.enabled = false;
         bodyCollider.enabled = false;
-        rb.isKinematic = true;                // fizik dursun
+        rb.isKinematic = true;
     }
 
-    // Q ile bırakıldı (Furkan'ın RobotStorage'ı çağırır)
     public void OnDropped(Vector3 position, Vector3 throwDirection)
     {
         state = State.OnGround;
@@ -96,50 +98,52 @@ public class TrashItem : MonoBehaviour
 
         visual.gameObject.SetActive(true);
         visual.localScale = fullScale;
-        growTimer = growTime;                 // atılınca büyüme animasyonu olmasın
+        growTimer = growTime;
 
         pickupTrigger.enabled = true;
-        bodyCollider.enabled = true;          // yere çarpabilsin
+        bodyCollider.enabled = true;
 
-        rb.isKinematic = false;               // fizik başlasın
+        rb.isKinematic = false;
         rb.linearVelocity = Vector3.zero;
-        Vector3 push = throwDirection.normalized + Vector3.up;   // ileri ve yukarı
+        Vector3 push = throwDirection.normalized + Vector3.up;
         rb.AddForce(push * throwForce, ForceMode.Impulse);
 
-        canPickUpAt = Time.time + pickupDelay;   // hemen geri alınmasın
+        canPickUpAt = Time.time + pickupDelay;
     }
 
-    // Teslim edildi (Furkan'ın RobotStorage'ı çağırır)
     public void OnDelivered()
     {
         state = State.Delivered;
-        if (spawner != null) spawner.OnTrashRemoved(this);   // üreticiye haber ver
-        Destroy(gameObject);                                  // sahneden sil
+        if (spawner != null) spawner.OnTrashRemoved(this);
+        Destroy(gameObject);
     }
 
-    public int GetValue() { return value; }
-    public float GetWeight() { return weight; }
-    public TrashType GetTrashType() { return trashType; }
+    // Değer ve ağırlık artık veri dosyasından
+    public int GetValue()
+    {
+        if (data == null) return 0;
+        return data.GetValue();
+    }
 
-    // Bakılınca parla
+    public float GetWeight()
+    {
+        if (data == null) return 0f;
+        return data.GetWeight();
+    }
+
+    public TrashData GetData() { return data; }
+
+    // ESKİ: kimse kullanmıyor, Aşama 2'de silinecek
+    public TrashType GetTrashType() { return TrashType.Normal; }
+
     public void SetHighlight(bool on)
     {
-        if (on)
-        {
-            visualRenderer.material.color = Color.Lerp(baseColor, Color.white, 0.5f);
-        }
-        else
-        {
-            visualRenderer.material.color = baseColor;
-        }
+        if (on) visualRenderer.material.color = Color.Lerp(baseColor, Color.white, 0.5f);
+        else visualRenderer.material.color = baseColor;
     }
 
     public void SetSpawner(TrashSpawner newSpawner)
     {
         spawner = newSpawner;
     }
-        // ===== AŞAMA 1 SÖZLEŞMESİ (Sümeyra dolduracak) =====
-
-    // Bu çöpün veri dosyası (hotbar rengi için Nagihan kullanır)
-    public TrashData GetData() { return null; }
 }

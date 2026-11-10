@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 55099c1598c7e714189856f48c6489ba, type: 2}
+  - {fileID: 2100000, guid: 66763b70980a9484898295710cd71d7a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 4619376922739208790}
   - component: {fileID: 8578215888754955527}
   m_Layer: 0
-  m_Name: Trash_Normal
+  m_Name: Trash_Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -188,9 +188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee4da5496bd7fb848aeca45b68273899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrashItem
-  trashType: 0
-  value: 1
-  weight: 1
+  data: {fileID: 0}
   visual: {fileID: 4073901706553049249}
   pickupTrigger: {fileID: 5093236420329776870}
   bodyCollider: {fileID: 8578215888754955527}
