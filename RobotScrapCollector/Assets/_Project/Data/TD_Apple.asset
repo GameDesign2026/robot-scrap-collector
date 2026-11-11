@@ -17,4 +17,4 @@ MonoBehaviour:
   weight: 1
   chance: 50
   color: {r: 0.7882353, g: 0.2901961, b: 0.22745098, a: 1}
-  prefab: {fileID: 0}
+  prefab: {fileID: 2843488284995823520, guid: 7a58968bb527cdc4689fea6f9ff8ae49, type: 3}
