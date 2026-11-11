@@ -828,11 +828,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4802413251881706713, guid: d62cc753197a5334192a929a9b605442, type: 3}
   m_PrefabInstance: {fileID: 1395036033}
   m_PrefabAsset: {fileID: 0}
---- !u!20 &1395036035 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 2574010723738274511, guid: d62cc753197a5334192a929a9b605442, type: 3}
-  m_PrefabInstance: {fileID: 1395036033}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1395036036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -845,7 +840,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1313e56841e830642922d73f4a144294, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotInteractor
-  cam: {fileID: 1395036035}
+  rayOrigin: {fileID: 0}
   range: 2.5
   promptText: {fileID: 426663366778761644, guid: 4a823608137107547957d0bba5f250a4, type: 3}
 --- !u!1001 &1524699248
@@ -905,6 +900,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6a197c5ef50c5c5499f58e77e6284f34, type: 3}
+--- !u!1001 &1907680789117687994
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2559637740797088692, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4436106870379356881, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
+      propertyPath: m_Name
+      value: GardenTracker
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c6f3a4874dff3be4aa23ddc08d12701b, type: 3}
 --- !u!1001 &5629454745096325989
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1017,3 +1069,4 @@ SceneRoots:
   - {fileID: 1169595690}
   - {fileID: 586976975}
   - {fileID: 1524699248}
+  - {fileID: 1907680789117687994}
