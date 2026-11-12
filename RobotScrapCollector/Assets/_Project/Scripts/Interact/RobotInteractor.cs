@@ -115,4 +115,8 @@ public class RobotInteractor : MonoBehaviour
     {
         if (promptText != null) promptText.text = text;
     }
+        // ===== AŞAMA 3 SÖZLEŞMESİ (Sümeyra dolduracak) =====
+
+    // Mıknatıs geliştirmesi: E ile alma mesafesi (Nazife çağırır)
+    public void SetRange(float newRange) { }
 }

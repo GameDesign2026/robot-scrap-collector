@@ -178,4 +178,8 @@ public class Pedestrian : MonoBehaviour
 
         return difference / flightTime - 0.5f * Physics.gravity * flightTime;
     }
+        // ===== AŞAMA 3 SÖZLEŞMESİ (Nagihan dolduracak) =====
+
+    // Fırlattığı çöp havada vuruldu: korkup kaçar (Sümeyra'nın sopası çağırır)
+    public void Flee() { }
 }

@@ -226,4 +226,11 @@ public class TrashItem : MonoBehaviour
     {
         spawner = newSpawner;
     }
+        // ===== AŞAMA 3 SÖZLEŞMESİ (Sümeyra dolduracak) =====
+
+    // Düşüş işareti: çöp inince ya da vurulunca bu işareti silsin (Nagihan verir)
+    public void SetMarker(GameObject marker) { }
+
+    // Bu çöpü atan yaya: sopayla vurulunca ona "kaç" denecek (Nagihan verir)
+    public void SetThrower(Pedestrian thrower) { }
 }

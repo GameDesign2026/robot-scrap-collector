@@ -199,4 +199,8 @@ public class RobotStorage : MonoBehaviour
         }
         return total;
     }
+        // ===== AŞAMA 3 SÖZLEŞMESİ (Furkan dolduracak) =====
+
+    // Ceza: Scrap'tan düş, eksiye düşebilir (Ali çağırır)
+    public void RemoveScrap(int amount) { }
 }

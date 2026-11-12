@@ -99,4 +99,12 @@ public class UpgradeShop : MonoBehaviour
     public int GetBatteryMaxLevel() { return batteryCosts.Length; }
     public int GetSpeedLevel() { return speedLevel; }
     public int GetSpeedMaxLevel() { return speedCosts.Length; }
+
+    
+        // ===== AŞAMA 3 SÖZLEŞMESİ (Nazife dolduracak) =====
+
+    public bool BuyMagnet() { return false; }
+    public bool BuyBatPower() { return false; }
+    public int GetMagnetCost() { return 0; }
+    public int GetBatPowerCost() { return 0; }
 }
