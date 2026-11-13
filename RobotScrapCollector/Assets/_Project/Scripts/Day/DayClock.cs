@@ -3,24 +3,30 @@ using UnityEngine;
 // SAHİBİ: Ali — oyunun saati: 08:00'den 20:00'e
 public class DayClock : MonoBehaviour
 {
-    [SerializeField] private float realMinutesPerDay = 6f;   // bir oyun günü kaç gerçek dakika
+    [SerializeField] private float realMinutesPerDay = 6f;
     [SerializeField] private float startHour = 8f;
-    [SerializeField] private float throwEndHour = 19f;       // bu saatten sonra çöp atılmaz
+    [SerializeField] private float throwEndHour = 19f;
     [SerializeField] private float endHour = 20f;
+    [SerializeField] private int penaltyPerTrash = 1;   // YENİ: kalan her çöp için ceza
 
     private float hour;
     private int day = 1;
     private bool dayOver;
-    private int scrapAtDayStart;    // gün başındaki Scrap (bugün ne kadar kazanıldı?)
+    private int scrapAtDayStart;
 
     private RobotStorage storage;
     private RobotMove move;
     private DaySummaryUI summary;
+    private PedestrianSpawner spawner;   // YENİ
+
+    // YENİ: saat Awake'te başlıyor (ilk gün hatası buradaydı)
+    void Awake()
+    {
+        hour = startHour;
+    }
 
     void Start()
     {
-        hour = startHour;
-
         GameObject robot = GameObject.FindWithTag("Player");
         if (robot != null)
         {
@@ -28,17 +34,17 @@ public class DayClock : MonoBehaviour
             move = robot.GetComponent<RobotMove>();
         }
 
-        // Özet ekranı başta gizli olabilir: gizli objeleri de ara
         summary = FindFirstObjectByType<DaySummaryUI>(FindObjectsInactive.Include);
+        spawner = FindFirstObjectByType<PedestrianSpawner>();
 
         if (storage != null) scrapAtDayStart = storage.GetScrap();
+        if (spawner != null) spawner.SetDifficulty(day);   // YENİ: 1. günün zorluğu
     }
 
     void Update()
     {
         if (dayOver) return;
 
-        // Gerçek saniye → oyun saati
         float hoursPerSecond = (endHour - startHour) / (realMinutesPerDay * 60f);
         hour += hoursPerSecond * Time.deltaTime;
 
@@ -49,7 +55,6 @@ public class DayClock : MonoBehaviour
         }
     }
 
-    // Gün bitti: bir kez çalışır
     private void EndDay()
     {
         dayOver = true;
@@ -57,22 +62,41 @@ public class DayClock : MonoBehaviour
         int trashLeft = 0;
         if (GardenTracker.Instance != null) trashLeft = GardenTracker.Instance.GetCount();
 
+        // YENİ: kalan her çöp için ceza (eksiye düşebilir)
+        if (trashLeft > 0 && storage != null)
+        {
+            storage.RemoveScrap(trashLeft * penaltyPerTrash);
+        }
+
+        // Bugün kazanılan: cezadan SONRA hesaplanır
         int scrapEarned = 0;
         if (storage != null) scrapEarned = storage.GetScrap() - scrapAtDayStart;
 
         bool success = trashLeft == 0;
 
-        Debug.Log("Gün " + day + " bitti · Scrap +" + scrapEarned + " · bahçede " + trashLeft + " çöp");
+        Debug.Log("Gün " + day + " bitti · net Scrap " + scrapEarned + " · bahçede " + trashLeft + " çöp");
 
         if (move != null) move.SetControlEnabled(false);
         if (summary != null) summary.Show(day, scrapEarned, trashLeft, success);
+    }
+
+    // YENİ: bahçedeki (yerdeki ve havadaki) bütün çöpleri sil, taşınanlara dokunma
+    private void ClearGarden()
+    {
+        TrashItem[] all = FindObjectsByType<TrashItem>(FindObjectsSortMode.None);
+        foreach (TrashItem item in all)
+        {
+            if (item.IsInAir() || item.CanBePickedUp())
+            {
+                Destroy(item.gameObject);
+            }
+        }
     }
 
     // ===== SÖZLEŞME =====
 
     public float GetHour() { return hour; }
 
-    // "14:35" gibi
     public string GetTimeText()
     {
         int h = Mathf.FloorToInt(hour);
@@ -80,27 +104,21 @@ public class DayClock : MonoBehaviour
         return h.ToString("00") + ":" + m.ToString("00");
     }
 
-    public bool CanThrow()
-    {
-        return !dayOver && hour < throwEndHour;
-    }
-
-    public bool IsCleanupTime()
-    {
-        return !dayOver && hour >= throwEndHour;
-    }
-
+    public bool CanThrow() { return !dayOver && hour < throwEndHour; }
+    public bool IsCleanupTime() { return !dayOver && hour >= throwEndHour; }
     public bool IsDayOver() { return dayOver; }
-
     public int GetDay() { return day; }
 
-    // "Sonraki Gün" butonu çağırır
     public void StartNewDay()
     {
+        ClearGarden();                         // YENİ: ceza ödendi, bahçe temizlensin
+
         day++;
         hour = startHour;
         dayOver = false;
         if (storage != null) scrapAtDayStart = storage.GetScrap();
+
+        if (spawner != null) spawner.SetDifficulty(day);   // YENİ: her gün biraz daha zor
 
         if (summary != null) summary.Hide();
         if (move != null) move.SetControlEnabled(true);
@@ -108,7 +126,16 @@ public class DayClock : MonoBehaviour
         Debug.Log("Gün " + day + " başladı");
     }
 
-    // ----- HATA AYIKLAMA (Inspector'da ⋮ menüsünden) -----
+    // YENİ: LivesManager (çekici) çağırır: saati ileri al, en fazla 20:00
+    public void AddHours(float hours)
+    {
+        if (dayOver) return;
+
+        hour = Mathf.Min(hour + hours, endHour);
+        if (hour >= endHour) EndDay();
+    }
+
+    // ----- HATA AYIKLAMA -----
     [ContextMenu("DEBUG: Jump to 18:50")]
     private void DebugJumpToEvening() { hour = 18.83f; }
 

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 430963697448734122}
   - component: {fileID: 5899457657975992286}
+  - component: {fileID: 3206648659400208757}
   m_Layer: 0
   m_Name: DayClock
   m_TagString: Untagged
@@ -48,3 +49,21 @@ MonoBehaviour:
   startHour: 8
   throwEndHour: 19
   endHour: 20
+  penaltyPerTrash: 1
+--- !u!114 &3206648659400208757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2223590887009719514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12f9bdc5f876ce648ad7bfd9cc88ae35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LivesManager
+  maxLives: 3
+  towHours: 1
+  fadeTime: 0.6
+  holdTime: 0.8
+  towOffset: {x: 0, y: 0, z: -5}

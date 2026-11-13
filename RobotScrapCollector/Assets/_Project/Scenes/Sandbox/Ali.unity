@@ -298,6 +298,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DayClock
       objectReference: {fileID: 0}
+    - target: {fileID: 3206648659400208757, guid: 1b1e30ef0a826254eb2ad2d5d4bf1556, type: 3}
+      propertyPath: towOffset.z
+      value: -5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -992,6 +996,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Robot
       objectReference: {fileID: 0}
+    - target: {fileID: 6920510611119798344, guid: d62cc753197a5334192a929a9b605442, type: 3}
+      propertyPath: drainPerMeter
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7474031614239474674, guid: d62cc753197a5334192a929a9b605442, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1059,6 +1067,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BatteryUsage
   drainPerMeter: 1
   extraDrainPerWeight: 0.1
+  sprintDrainMultiplier: 2
 --- !u!114 &2098317325 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 967769243441325368, guid: d62cc753197a5334192a929a9b605442, type: 3}

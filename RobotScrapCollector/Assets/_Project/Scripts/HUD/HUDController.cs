@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-// SAHİBİ: Ali — ekranda batarya, Scrap, saat ve bahçedeki çöp
+// SAHİBİ: Ali — batarya, Scrap, saat, bahçe, canlar, çekici perdesi
 public class HUDController : MonoBehaviour
 {
     [Header("Robot (boş bırakılırsa kendisi bulur)")]
@@ -14,22 +14,30 @@ public class HUDController : MonoBehaviour
     [SerializeField] private TMP_Text batteryText;
     [SerializeField] private TMP_Text scrapText;
     [SerializeField] private TMP_Text chargingText;
-    [SerializeField] private TMP_Text clockText;      // YENİ
-    [SerializeField] private TMP_Text gardenText;     // YENİ
-    [SerializeField] private TMP_Text cleanupText;    // YENİ
+    [SerializeField] private TMP_Text clockText;
+    [SerializeField] private TMP_Text gardenText;
+    [SerializeField] private TMP_Text cleanupText;
+    [SerializeField] private Image[] lifeIcons;        // YENİ: Life1, Life2, Life3
+    [SerializeField] private Image towOverlay;         // YENİ: siyah perde
+    [SerializeField] private TMP_Text towText;         // YENİ: "ROBOT ÇEKİLDİ!"
 
     [Header("Renkler")]
     [SerializeField] private Color highColor = new Color(0.24f, 0.86f, 0.52f);
     [SerializeField] private Color midColor = new Color(1f, 0.84f, 0.31f);
     [SerializeField] private Color lowColor = new Color(0.9f, 0.22f, 0.21f);
     [SerializeField] private Color chargeColor = new Color(0.31f, 0.76f, 0.97f);
-    [SerializeField] private Color cleanColor = new Color(0.24f, 0.86f, 0.52f);   // YENİ: bahçe temiz
+    [SerializeField] private Color cleanColor = new Color(0.24f, 0.86f, 0.52f);
+    [SerializeField] private Color scrapColor = new Color(1f, 0.84f, 0.31f);           // YENİ: normal Scrap (sarı)
+    [SerializeField] private Color debtColor = new Color(1f, 0.32f, 0.32f);            // YENİ: borç (kırmızı)
+    [SerializeField] private Color lifeOnColor = new Color(0.9f, 0.22f, 0.21f);        // YENİ: dolu can
+    [SerializeField] private Color lifeOffColor = new Color(0.25f, 0.25f, 0.25f, 0.6f); // YENİ: gitmiş can
 
     [Header("Uyarı")]
     [SerializeField] private float warningLevel = 0.25f;
     [SerializeField] private float blinkInterval = 0.3f;
 
-    private DayClock clock;   // YENİ
+    private DayClock clock;
+    private LivesManager livesManager;   // YENİ
     private float timer;
     private bool blinkOn;
 
@@ -46,51 +54,88 @@ public class HUDController : MonoBehaviour
         }
 
         clock = FindFirstObjectByType<DayClock>();
+        livesManager = FindFirstObjectByType<LivesManager>();
+
+        SetTowOverlay(0f);   // YENİ: başta perde kapalı
     }
 
     void Update()
     {
         UpdateBattery();
         UpdateScrap();
-        UpdateDay();   // YENİ
+        UpdateDay();
+        UpdateLives();   // YENİ
     }
 
-    // ----- YENİ: saat, bahçe, uyarı -----
+    // ----- YENİ: canlar -----
+    private void UpdateLives()
+    {
+        if (livesManager == null || lifeIcons == null) return;
+
+        int lives = livesManager.GetLives();
+        for (int i = 0; i < lifeIcons.Length; i++)
+        {
+            if (lifeIcons[i] == null) continue;
+            lifeIcons[i].color = (i < lives) ? lifeOnColor : lifeOffColor;
+        }
+    }
+
+    // ----- YENİ: LivesManager çağırır (0 = görünmez, 1 = tam karanlık) -----
+    public void SetTowOverlay(float amount)
+    {
+        if (towOverlay != null)
+        {
+            Color c = towOverlay.color;
+            c.a = amount * 0.85f;   // tam siyah değil, oyun hafifçe arkadan görünsün
+            towOverlay.color = c;
+        }
+        if (towText != null)
+        {
+            Color c = towText.color;
+            c.a = amount;
+            towText.color = c;
+        }
+    }
+
+    private void UpdateScrap()
+    {
+        if (storage == null || scrapText == null) return;
+
+        int scrap = storage.GetScrap();
+        scrapText.text = "Scrap: " + scrap;
+        scrapText.color = (scrap < 0) ? debtColor : scrapColor;   // YENİ: borçtaysa kırmızı
+    }
+
+    // ----- Aşağısı 2. aşamayla aynı -----
     private void UpdateDay()
     {
-        // Saat
         if (clockText != null)
         {
             if (clock != null) clockText.text = "Gün " + clock.GetDay() + " · " + clock.GetTimeText();
             else clockText.text = "";
         }
 
-        // Bahçedeki çöp
         if (gardenText != null)
         {
             int count = 0;
             if (GardenTracker.Instance != null) count = GardenTracker.Instance.GetCount();
-
             gardenText.text = "Bahçede: " + count + " çöp";
             gardenText.color = (count == 0) ? cleanColor : Color.white;
         }
 
-        // Son saat uyarısı: nabız gibi atan kırmızı yazı
         if (cleanupText != null)
         {
             bool show = clock != null && clock.IsCleanupTime();
             cleanupText.gameObject.SetActive(show);
-
             if (show)
             {
                 Color c = cleanupText.color;
-                c.a = 0.55f + Mathf.Sin(Time.time * 5f) * 0.45f;   // 0.1 ile 1 arası
+                c.a = 0.55f + Mathf.Sin(Time.time * 5f) * 0.45f;
                 cleanupText.color = c;
             }
         }
     }
 
-    // ----- Aşağısı Aşama 1 ile aynı -----
     private void UpdateBattery()
     {
         if (battery == null || batteryFill == null) return;
@@ -148,11 +193,5 @@ public class HUDController : MonoBehaviour
 
         if (blinkOn) batteryFill.color = lowColor;
         else batteryFill.color = lowColor * 0.4f;
-    }
-
-    private void UpdateScrap()
-    {
-        if (storage == null || scrapText == null) return;
-        scrapText.text = "Scrap: " + storage.GetScrap();
     }
 }

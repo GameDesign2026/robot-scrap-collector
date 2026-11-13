@@ -5,10 +5,12 @@ public class BatteryUsage : MonoBehaviour
 {
     [SerializeField] private float drainPerMeter = 1f;
     [SerializeField] private float extraDrainPerWeight = 0.1f;
+    [SerializeField] private float sprintDrainMultiplier = 2f;   // YENİ: koşarken metre başına 2 kat
 
     private Rigidbody rb;
     private RobotBattery battery;
     private RobotStorage storage;
+    private RobotMove move;            // YENİ
     private Vector3 lastPosition;
 
     void Start()
@@ -16,6 +18,7 @@ public class BatteryUsage : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         battery = GetComponent<RobotBattery>();
         storage = GetComponent<RobotStorage>();
+        move = GetComponent<RobotMove>();
 
         lastPosition = rb.position;
         lastPosition.y = 0f;
@@ -26,15 +29,17 @@ public class BatteryUsage : MonoBehaviour
         Vector3 now = rb.position;
         now.y = 0f;
 
-        // YENİ: markette (şarjda) iken harcama yok
         if (battery.IsCharging())
         {
-            lastPosition = now;   // konumu yine de güncelle
+            lastPosition = now;
             return;
         }
 
         float distance = Vector3.Distance(now, lastPosition);
         lastPosition = now;
+
+        // YENİ: ışınlandıysa (çekici) bu bir "yol" değil
+        if (distance > 3f) return;
 
         if (distance < 0.001f) return;
 
@@ -42,6 +47,12 @@ public class BatteryUsage : MonoBehaviour
         if (storage != null)
         {
             load = 1f + storage.GetCarriedWeight() * extraDrainPerWeight;
+        }
+
+        // YENİ: koşuyorsa metre başına daha çok
+        if (move != null && move.IsSprinting())
+        {
+            load *= sprintDrainMultiplier;
         }
 
         battery.Drain(distance * drainPerMeter * load);
