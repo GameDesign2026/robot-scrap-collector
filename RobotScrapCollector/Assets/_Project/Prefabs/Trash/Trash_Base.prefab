@@ -195,6 +195,9 @@ MonoBehaviour:
   growTime: 0.5
   pickupDelay: 0.5
   throwForce: 3
+  maxAirTime: 5
+  landDustFx: {fileID: 3434570074721376241, guid: 6e3912702a279b247863e4d594fd18c7, type: 3}
+  pickupFx: {fileID: 639227977616299505, guid: ae1b5171ad32878499744dbfb9b11a5f, type: 3}
 --- !u!54 &4619376922739208790
 Rigidbody:
   m_ObjectHideFlags: 0

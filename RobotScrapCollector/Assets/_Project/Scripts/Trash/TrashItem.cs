@@ -17,7 +17,11 @@ public class TrashItem : MonoBehaviour
     [SerializeField] private float growTime = 0.5f;
     [SerializeField] private float pickupDelay = 0.5f;
     [SerializeField] private float throwForce = 3f;
-    [SerializeField] private float maxAirTime = 5f;   // bu kadar havada kalırsa (çatıya takıldıysa) silinir
+    [SerializeField] private float maxAirTime = 5f;
+
+    [Header("Efektler (YENİ)")]
+    [SerializeField] private GameObject landDustFx;    // FX_Dust
+    [SerializeField] private GameObject pickupFx;      // FX_Sparkle
 
     private State state = State.OnGround;
     private Rigidbody rb;
@@ -28,7 +32,11 @@ public class TrashItem : MonoBehaviour
     private float canPickUpAt;
     private float airTimer;
     private int groundLayer;
-    private TrashSpawner spawner;   // eski üretici (birleştirmede kalkacak)
+    private TrashSpawner spawner;
+
+    private GameObject marker;      // YENİ: Nagihan'ın halkası
+    private Pedestrian thrower;     // YENİ: beni atan yaya
+    private bool wasHit;            // YENİ: sopayla vuruldum mu?
 
     void Awake()
     {
@@ -54,8 +62,6 @@ public class TrashItem : MonoBehaviour
 
     void Start()
     {
-        // Yerde doğan çöp (eski üretici) hemen sayılsın.
-        // Fırlatılan çöpte Launch, Start'tan ÖNCE çağrıldığı için durum zaten InAir olur.
         if (state == State.OnGround && GardenTracker.Instance != null)
         {
             if (GardenTracker.Instance.IsInsideGarden(transform.position))
@@ -75,7 +81,6 @@ public class TrashItem : MonoBehaviour
             visual.localScale = fullScale * growth;
         }
 
-        // Havada çok uzun kaldıysa (bir çatıya takıldı): sil
         if (state == State.InAir)
         {
             airTimer += Time.deltaTime;
@@ -85,7 +90,6 @@ public class TrashItem : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Sadece yerdeyken: hareket bitti mi?
         if (state != State.OnGround) return;
         if (rb.isKinematic) return;
         if (Time.time < canPickUpAt) return;
@@ -95,36 +99,33 @@ public class TrashItem : MonoBehaviour
         bodyCollider.enabled = false;
     }
 
-    // Havadayken bir şeye çarptı
     void OnCollisionEnter(Collision collision)
     {
         if (state != State.InAir) return;
-        if (collision.gameObject.layer != groundLayer) return;   // zemin değilse sekmeye devam
+        if (collision.gameObject.layer != groundLayer) return;
 
         Land();
     }
 
-    // Unity, obje silinmeden hemen önce çağırır: ne olursa olsun sayaçtan düş
     void OnDestroy()
     {
         if (GardenTracker.Instance != null) GardenTracker.Instance.Unregister(this);
+        RemoveMarker();   // YENİ: çöp nasıl silinirse silinsin, halka da gitsin
     }
 
     // ===== AŞAMA 2 =====
 
-    // Yaya fırlattı (Nagihan çağırır)
     public void Launch(Vector3 velocity)
     {
         state = State.InAir;
         airTimer = 0f;
 
-        // Elden tam boyda çıksın (doğma animasyonu olmasın)
         visual.gameObject.SetActive(true);
         visual.localScale = fullScale;
         growTimer = growTime;
 
-        pickupTrigger.enabled = false;   // havadayken alınamaz
-        bodyCollider.enabled = true;     // yere çarpabilsin
+        pickupTrigger.enabled = false;
+        bodyCollider.enabled = true;
 
         rb.isKinematic = false;
         rb.linearVelocity = velocity;
@@ -135,10 +136,10 @@ public class TrashItem : MonoBehaviour
         return state == State.InAir;
     }
 
-    // Zemine indi
     private void Land()
     {
-        // Bahçenin dışına düştüyse (yol, çim): yok ol
+        RemoveMarker();   // YENİ: yere değdi, halka gitsin
+
         if (GardenTracker.Instance != null && !GardenTracker.Instance.IsInsideGarden(transform.position))
         {
             Destroy(gameObject);
@@ -147,12 +148,70 @@ public class TrashItem : MonoBehaviour
 
         state = State.OnGround;
         pickupTrigger.enabled = true;
-        canPickUpAt = Time.time + 0.3f;   // sekerken hemen alınmasın
+        canPickUpAt = Time.time + 0.3f;
+
+        SpawnFx(landDustFx, transform.position);   // YENİ: toz
 
         if (GardenTracker.Instance != null) GardenTracker.Instance.Register(this);
     }
 
-    // ===== SÖZLEŞME (önceki aşamalar) =====
+    // ===== AŞAMA 3 (YENİ) =====
+
+    // Nagihan verir: düşüş halkası
+    public void SetMarker(GameObject newMarker)
+    {
+        marker = newMarker;
+    }
+
+    // Nagihan verir: beni atan yaya
+    public void SetThrower(Pedestrian newThrower)
+    {
+        thrower = newThrower;
+    }
+
+    // Sopa sorar: beni vurabilir mi?
+    public bool CanBeHit()
+    {
+        return state == State.InAir && !wasHit;
+    }
+
+    // Sopa çağırır: yeni bir hızla fırla
+    public void HitAway(Vector3 velocity)
+    {
+        if (!CanBeHit()) return;
+
+        wasHit = true;
+        airTimer = 0f;
+
+        rb.isKinematic = false;
+        bodyCollider.enabled = true;
+        rb.linearVelocity = velocity;
+
+        RemoveMarker();   // eski hedef artık geçersiz
+
+        // Beni atan yaya korksun ve kaçsın
+        if (thrower != null)
+        {
+            thrower.Flee();
+            thrower = null;
+        }
+    }
+
+    private void RemoveMarker()
+    {
+        if (marker != null)
+        {
+            Destroy(marker);
+            marker = null;
+        }
+    }
+
+    private void SpawnFx(GameObject fxPrefab, Vector3 position)
+    {
+        if (fxPrefab != null) Instantiate(fxPrefab, position, Quaternion.identity);
+    }
+
+    // ===== ÖNCEKİ AŞAMALAR =====
 
     public bool CanBePickedUp()
     {
@@ -161,6 +220,8 @@ public class TrashItem : MonoBehaviour
 
     public void OnPickedUp()
     {
+        SpawnFx(pickupFx, visual.position);   // YENİ: parıltı (gizlenmeden önce, görünüşün olduğu yerde)
+
         state = State.Carried;
         SetHighlight(false);
         visual.gameObject.SetActive(false);
@@ -190,7 +251,6 @@ public class TrashItem : MonoBehaviour
 
         canPickUpAt = Time.time + pickupDelay;
 
-        // Robot bahçenin içinde, düşürdüğü çöp de bahçeye düştü
         if (GardenTracker.Instance != null) GardenTracker.Instance.Register(this);
     }
 
@@ -198,7 +258,7 @@ public class TrashItem : MonoBehaviour
     {
         state = State.Delivered;
         if (spawner != null) spawner.OnTrashRemoved(this);
-        Destroy(gameObject);   // OnDestroy sayaçtan düşürür
+        Destroy(gameObject);
     }
 
     public int GetValue()
@@ -221,16 +281,8 @@ public class TrashItem : MonoBehaviour
         else visualRenderer.material.color = baseColor;
     }
 
-    // ESKİ üretici için (birleştirmede üretici kalkınca da zararsız)
     public void SetSpawner(TrashSpawner newSpawner)
     {
         spawner = newSpawner;
     }
-        // ===== AŞAMA 3 SÖZLEŞMESİ (Sümeyra dolduracak) =====
-
-    // Düşüş işareti: çöp inince ya da vurulunca bu işareti silsin (Nagihan verir)
-    public void SetMarker(GameObject marker) { }
-
-    // Bu çöpü atan yaya: sopayla vurulunca ona "kaç" denecek (Nagihan verir)
-    public void SetThrower(Pedestrian thrower) { }
 }

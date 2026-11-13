@@ -118,5 +118,8 @@ public class RobotInteractor : MonoBehaviour
         // ===== AŞAMA 3 SÖZLEŞMESİ (Sümeyra dolduracak) =====
 
     // Mıknatıs geliştirmesi: E ile alma mesafesi (Nazife çağırır)
-    public void SetRange(float newRange) { }
+    public void SetRange(float newRange)
+    {
+        if (newRange > 0f) range = newRange;
+    }
 }
