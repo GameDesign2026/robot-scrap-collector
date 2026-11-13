@@ -101,10 +101,70 @@ public class UpgradeShop : MonoBehaviour
     public int GetSpeedMaxLevel() { return speedCosts.Length; }
 
     
-        // ===== AŞAMA 3 SÖZLEŞMESİ (Nazife dolduracak) =====
+    // ===== AŞAMA 3 (Nazife) =====
 
-    public bool BuyMagnet() { return false; }
-    public bool BuyBatPower() { return false; }
-    public int GetMagnetCost() { return 0; }
-    public int GetBatPowerCost() { return 0; }
+    [Header("Mıknatıs (E ile alma mesafesi)")]
+    [SerializeField] private int[] magnetCosts = { 20, 45 };
+    [SerializeField] private float[] magnetRanges = { 3.5f, 4.5f };
+
+    [Header("Güçlü Sopa (vuruş alanı)")]
+    [SerializeField] private int[] batPowerCosts = { 25, 60 };
+    [SerializeField] private float[] batRadii = { 1.4f, 1.8f };
+
+    private int magnetLevel;     // kaç kere alındı
+    private int batPowerLevel;
+
+    // Esra'nın market paneli sorar: bir sonraki seviyenin fiyatı (-1 = maks)
+    public int GetMagnetCost()
+    {
+        if (magnetLevel >= magnetCosts.Length) return -1;
+        return magnetCosts[magnetLevel];
+    }
+
+    public int GetBatPowerCost()
+    {
+        if (batPowerLevel >= batPowerCosts.Length) return -1;
+        return batPowerCosts[batPowerLevel];
+    }
+
+    // Esra'nın butonu çağırır
+    public bool BuyMagnet()
+    {
+        int cost = GetMagnetCost();
+        if (cost < 0) return false;                               // zaten maks
+
+        RobotStorage store = GetComponent<RobotStorage>();
+        if (store == null || !store.SpendScrap(cost)) return false;   // para yetmedi
+
+        // Yeni mesafeyi Sümeyra'nın etkileşim kodunda ayarla
+        RobotInteractor interactor = GetComponent<RobotInteractor>();
+        if (interactor != null && magnetLevel < magnetRanges.Length)
+        {
+            interactor.SetRange(magnetRanges[magnetLevel]);
+        }
+
+        magnetLevel++;
+        Debug.Log("Mıknatıs seviye " + magnetLevel);
+        return true;
+    }
+
+    public bool BuyBatPower()
+    {
+        int cost = GetBatPowerCost();
+        if (cost < 0) return false;
+
+        RobotStorage store = GetComponent<RobotStorage>();
+        if (store == null || !store.SpendScrap(cost)) return false;
+
+        // Yeni yarıçapı Sümeyra'nın sopasında ayarla
+        BatController bat = GetComponent<BatController>();
+        if (bat != null && batPowerLevel < batRadii.Length)
+        {
+            bat.SetHitRadius(batRadii[batPowerLevel]);
+        }
+
+        batPowerLevel++;
+        Debug.Log("Güçlü sopa seviye " + batPowerLevel);
+        return true;
+    }
 }
