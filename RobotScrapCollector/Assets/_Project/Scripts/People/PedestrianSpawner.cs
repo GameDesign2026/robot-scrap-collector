@@ -1,7 +1,6 @@
 
 using UnityEngine;
 
-// Bir yol: başlangıç ve bitiş noktası (Inspector'da düzenlenebilir)
 [System.Serializable]
 public class PedestrianRoute
 {
@@ -21,8 +20,9 @@ public class PedestrianSpawner : MonoBehaviour
     [Header("Neler gelecek?")]
     [SerializeField] private GameObject[] pedestrianPrefabs;
     [SerializeField] private TrashTable trashTable;
+    [SerializeField] private LandingMarker markerPrefab;
 
-    [Header("Yollar (Furkan'ın dış yolu: bahçenin 4 yanı)")]
+    [Header("Yollar")]
     [SerializeField]
     private PedestrianRoute[] routes =
     {
@@ -32,13 +32,20 @@ public class PedestrianSpawner : MonoBehaviour
         new PedestrianRoute(new Vector3(-23f, 0f, -25f), new Vector3(-23f, 0f,  25f)),
     };
 
-    [Header("Yoğunluk: oyun saati başına kaç yaya (X = saat, Y = yaya)")]
+    [Header("Yoğunluk")]
     [SerializeField]
     private AnimationCurve pedestriansPerHour = new AnimationCurve(
         new Keyframe(8f, 3f), new Keyframe(9f, 5f), new Keyframe(10f, 2f),
         new Keyframe(12f, 2f), new Keyframe(14f, 2f), new Keyframe(16f, 3f),
         new Keyframe(17f, 7f), new Keyframe(18f, 8f), new Keyframe(19f, 0f),
         new Keyframe(20f, 0f));
+    [SerializeField] private float maxHourStep = 0.5f;
+
+    [Header("Zorluk")]
+    [SerializeField] private float difficultyPerDay = 0.15f;
+    [SerializeField] private float maxDifficulty = 2.5f;
+    [SerializeField] private float rareBoostPerDay = 0.1f;
+    [SerializeField] private float maxRareBoost = 0.6f;
 
     [Header("Yaya davranışı")]
     [SerializeField] private float throwChance = 0.8f;
@@ -58,6 +65,7 @@ public class PedestrianSpawner : MonoBehaviour
     private float lastHour;
     private float pending;
     private float difficulty = 1f;
+    private float rareBoost = 0f;
     private float testHour = 8f;
 
     void Start()
@@ -78,7 +86,11 @@ public class PedestrianSpawner : MonoBehaviour
         float passed = hour - lastHour;
         lastHour = hour;
 
+        // Saat ilerlemediyse ya da geri gittiyse (yeni gün): yaya yok
         if (passed <= 0f) return;
+
+        // Saat SIÇRADIYSA (oyunun ilk karesi, çekici): bu kareyi yok say
+        if (passed > maxHourStep) return;
 
         pending += pedestriansPerHour.Evaluate(hour) * difficulty * passed;
 
@@ -154,16 +166,34 @@ public class PedestrianSpawner : MonoBehaviour
     public TrashItem PickTrashPrefab()
     {
         if (trashTable == null) return null;
-        TrashData data = trashTable.PickRandom();
+        TrashData data = trashTable.PickRandom(rareBoost);
         if (data == null) return null;
         return data.GetPrefab();
     }
 
-    // ===== SÖZLEŞME (Aşama 3) =====
+    // Yaya çağırır: hedefe bir düşüş işareti koy
+    public LandingMarker CreateMarker(Vector3 point, float flightTime)
+    {
+        if (markerPrefab == null) return null;
 
+        // Zeminden 3 cm yukarıda: yolların ve çamurun üstünde kalsın
+        Vector3 position = point + Vector3.up * 0.03f;
+        LandingMarker marker = Instantiate(markerPrefab, position, Quaternion.identity);
+        marker.Init(flightTime);
+        return marker;
+    }
+
+    // ===== SÖZLEŞME =====
+
+    // Ali'nin saati her yeni gün çağırır
     public void SetDifficulty(int day)
     {
-        difficulty = 1f + (day - 1) * 0.15f;
+        int extraDays = Mathf.Max(0, day - 1);
+
+        difficulty = Mathf.Min(1f + extraDays * difficultyPerDay, maxDifficulty);
+        rareBoost = Mathf.Min(extraDays * rareBoostPerDay, maxRareBoost);
+
+        Debug.Log("Gün " + day + " zorluk: yaya ×" + difficulty + " · değerli çöp +" + Mathf.RoundToInt(rareBoost * 100) + "%");
     }
 
     public void ClearAll()

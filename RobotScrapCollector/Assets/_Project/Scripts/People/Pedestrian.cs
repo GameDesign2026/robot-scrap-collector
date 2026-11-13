@@ -1,16 +1,18 @@
 ﻿
 using UnityEngine;
 
-// SAHİBİ: Nagihan — tek bir yaya: yürür, durur, çöp fırlatır, gider
+// SAHİBİ: Nagihan — tek bir yaya: yürür, durur, çöp fırlatır, gider (ya da kaçar)
 public class Pedestrian : MonoBehaviour
 {
-    private enum State { Walking, WindUp, Throwing, Recover, Leaving }
+    private enum State { Walking, WindUp, Throwing, Recover, Leaving, Fleeing }
 
     private const float WindUpTime = 0.6f;
     private const float ThrowTime = 0.2f;
     private const float RecoverTime = 0.3f;
     private const float ArmBackAngle = 150f;
     private const float ArmForwardAngle = -60f;
+    private const float PanicArmAngle = 165f;
+    private const float FleeSpeedMultiplier = 3f;
 
     private PedestrianSpawner spawner;
     private Vector3 start;
@@ -60,7 +62,27 @@ public class Pedestrian : MonoBehaviour
             case State.Throwing: UpdateThrowing(); break;
             case State.Recover: UpdateRecover(); break;
             case State.Leaving: Walk(); break;
+            case State.Fleeing: Walk(); break;
         }
+    }
+
+    // ===== SÖZLEŞME =====
+
+    // Sümeyra'nın sopası çağırır: fırlattığım çöp havada vuruldu
+    public void Flee()
+    {
+        if (state == State.Fleeing) return;
+
+        state = State.Fleeing;
+        willThrow = false;
+        hasThrown = true;
+        released = true;
+
+        speed *= FleeSpeedMultiplier;
+        SetArm(PanicArmAngle);
+        FaceTowards(end);
+
+        Debug.Log(name + " kaçıyor!");
     }
 
     // ----- DURUMLAR -----
@@ -130,7 +152,6 @@ public class Pedestrian : MonoBehaviour
     private void Walk()
     {
         transform.position = Vector3.MoveTowards(transform.position, end, speed * Time.deltaTime);
-
         if (Vector3.Distance(transform.position, end) < 0.05f)
         {
             Destroy(gameObject);
@@ -165,21 +186,30 @@ public class Pedestrian : MonoBehaviour
         if (prefab == null) return;
 
         Vector3 from = handPoint.position;
+
+        // Uçuş süresini önce hesapla: hem hız hem işaret aynı süreyi kullanır
+        float flightTime = FlightTimeFor(from, target);
+        Vector3 velocity = BallisticVelocity(from, target, flightTime);
+
         TrashItem trash = Instantiate(prefab, from, Quaternion.identity);
-        trash.Launch(BallisticVelocity(from, target));
+        trash.SetThrower(this);
+        trash.Launch(velocity);
+
+        // Düşeceği yere küçülen halka
+        LandingMarker marker = spawner.CreateMarker(target, flightTime);
+        if (marker != null) trash.SetMarker(marker.gameObject);
     }
 
-    private Vector3 BallisticVelocity(Vector3 from, Vector3 to)
+    private float FlightTimeFor(Vector3 from, Vector3 to)
     {
         Vector3 difference = to - from;
         Vector3 flat = new Vector3(difference.x, 0f, difference.z);
+        return Mathf.Clamp(flat.magnitude / 12f, 0.8f, 1.6f);
+    }
 
-        float flightTime = Mathf.Clamp(flat.magnitude / 12f, 0.8f, 1.6f);
-
+    private Vector3 BallisticVelocity(Vector3 from, Vector3 to, float flightTime)
+    {
+        Vector3 difference = to - from;
         return difference / flightTime - 0.5f * Physics.gravity * flightTime;
     }
-        // ===== AŞAMA 3 SÖZLEŞMESİ (Nagihan dolduracak) =====
-
-    // Fırlattığı çöp havada vuruldu: korkup kaçar (Sümeyra'nın sopası çağırır)
-    public void Flee() { }
 }

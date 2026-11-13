@@ -6,15 +6,23 @@ using UnityEngine;
 public class TrashTable : ScriptableObject
 {
     [SerializeField] private TrashData[] entries;
+    [SerializeField] private int rareValueThreshold = 6;
 
+    // Eski: bonussuz (sözleşme, silinmedi)
     public TrashData PickRandom()
+    {
+        return PickRandom(0f);
+    }
+
+    // Yeni: değerli çöplerin şansı (1 + rareBoost) katına çıkar
+    public TrashData PickRandom(float rareBoost)
     {
         if (entries == null || entries.Length == 0) return null;
 
         float total = 0f;
         foreach (TrashData data in entries)
         {
-            if (data != null) total += data.GetChance();
+            if (data != null) total += WeightOf(data, rareBoost);
         }
         if (total <= 0f) return null;
 
@@ -24,7 +32,7 @@ public class TrashTable : ScriptableObject
         foreach (TrashData data in entries)
         {
             if (data == null) continue;
-            cumulative += data.GetChance();
+            cumulative += WeightOf(data, rareBoost);
             if (roll < cumulative) return data;
         }
 
@@ -33,6 +41,16 @@ public class TrashTable : ScriptableObject
             if (entries[i] != null) return entries[i];
         }
         return null;
+    }
+
+    private float WeightOf(TrashData data, float rareBoost)
+    {
+        float weight = data.GetChance();
+        if (data.GetValue() >= rareValueThreshold)
+        {
+            weight *= 1f + rareBoost;
+        }
+        return weight;
     }
 
     public int GetCount()
