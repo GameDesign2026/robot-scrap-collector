@@ -145,6 +145,13 @@ public class RobotStorage : MonoBehaviour
 
         scrap += total;
         Debug.Log("Delivered " + total + " · Scrap: " + scrap);
+
+        FloatingText.Spawn(
+            transform.position + Vector3.up * 2f,
+            "+" + total,
+            new Color(1f, 0.84f, 0.31f)
+        );
+
     }
 
     // ===== MARKET (Nazife'nin UpgradeShop'u çağırır) =====
@@ -199,8 +206,17 @@ public class RobotStorage : MonoBehaviour
         }
         return total;
     }
-        // ===== AŞAMA 3 SÖZLEŞMESİ (Furkan dolduracak) =====
+    // ===== AŞAMA 3 SÖZLEŞMESİ (Furkan dolduracak) =====
 
     // Ceza: Scrap'tan düş, eksiye düşebilir (Ali çağırır)
-    public void RemoveScrap(int amount) { }
+
+    public void RemoveScrap(int amount)
+    {
+        if (amount <= 0) return;
+
+        scrap -= amount;
+
+        Debug.Log("Ceza: -" + amount + " · Scrap: " + scrap);
+    }
+
 }
